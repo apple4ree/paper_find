@@ -12,7 +12,12 @@ from .models import Paper
 logger = logging.getLogger(__name__)
 
 # Source display priority (lower = shown first in output)
-_SOURCE_PRIORITY = {"huggingface": 0, "arxiv": 1, "semantic_scholar": 2}
+_SOURCE_PRIORITY = {
+    "huggingface": 0,
+    "huggingface_search": 1,
+    "arxiv": 2,
+    "semantic_scholar": 3,
+}
 
 
 class PaperProcessor:
@@ -75,9 +80,11 @@ def _deduplicate(papers: List[Paper]) -> List[Paper]:
                 existing.year = p.year
             if p.published_date and not existing.published_date:
                 existing.published_date = p.published_date
-            # Prefer HuggingFace source when merging
+            # Prefer HuggingFace daily source when merging
             if p.source == "huggingface":
                 existing.source = "huggingface"
+            elif p.source == "huggingface_search" and existing.source not in ("huggingface",):
+                existing.source = "huggingface_search"
     return list(seen.values())
 
 

@@ -24,12 +24,45 @@ logger = logging.getLogger(__name__)
 
 SS_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 
-# Representative search terms per topic (avoid exhaustive queries to save quota)
+# Delay between S2 requests (seconds): 1.5s without key, 0.5s with key
+_DELAY_NO_KEY = 1.5
+_DELAY_WITH_KEY = 0.5
+
+# Representative search terms per topic — broad enough to catch most papers
 TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
-    "Agent": ["llm agent", "autonomous agent", "multi-agent", "agentic workflow"],
-    "Harness": ["evaluation harness", "lm eval", "benchmarking framework", "eval suite"],
-    "Finance": ["financial llm", "stock market prediction", "portfolio optimization",
-                "algorithmic trading", "credit risk", "fraud detection"],
+    "Agent": [
+        "llm agent",
+        "language model agent",
+        "autonomous agent",
+        "multi-agent system",
+        "agentic workflow",
+        "tool-augmented language model",
+        "function calling",
+        "gui agent",
+        "web agent",
+        "code agent",
+    ],
+    "Harness": [
+        "evaluation harness",
+        "lm eval",
+        "benchmarking framework",
+        "evaluation suite",
+        "language model benchmark",
+        "llm evaluation",
+        "capability evaluation",
+    ],
+    "Finance": [
+        "financial large language model",
+        "stock market prediction",
+        "portfolio optimization",
+        "algorithmic trading",
+        "credit risk prediction",
+        "fraud detection deep learning",
+        "cryptocurrency prediction",
+        "financial sentiment analysis",
+        "market microstructure",
+        "fintech deep learning",
+    ],
 }
 
 
@@ -41,8 +74,10 @@ class SemanticScholarScraper:
     ):
         self.session = session or requests.Session()
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        self._has_key = bool(api_key)
         if api_key:
             self.session.headers["x-api-key"] = api_key
+        self._delay = _DELAY_WITH_KEY if self._has_key else _DELAY_NO_KEY
 
     # ------------------------------------------------------------------
     # Public interface
@@ -58,15 +93,36 @@ class SemanticScholarScraper:
             for term in terms:
                 try:
                     results = self._search(term, year_range)
+                    new_count = 0
                     for p in results:
                         pid = p.get_id()
                         if pid not in seen:
                             seen[pid] = p
+                            new_count += 1
+                    logger.debug(
+                        "S2 [%s / %s]: %d results (%d new)",
+                        topic, term, len(results), new_count,
+                    )
+                except requests.exceptions.HTTPError as exc:
+                    if exc.response is not None and exc.response.status_code == 429:
+                        logger.warning("S2 rate limited; sleeping 30s then retrying")
+                        time.sleep(30)
+                        try:
+                            results = self._search(term, year_range)
+                            for p in results:
+                                pid = p.get_id()
+                                if pid not in seen:
+                                    seen[pid] = p
+                        except Exception as retry_exc:
+                            logger.error("S2 retry failed [%s / %s]: %s", topic, term, retry_exc)
+                    else:
+                        logger.error("S2 HTTP error [%s / %s]: %s", topic, term, exc)
                 except Exception as exc:
                     logger.error("S2 error [%s / %s]: %s", topic, term, exc)
                 # Polite delay to stay within rate limits
-                time.sleep(1.5)
+                time.sleep(self._delay)
 
+        logger.info("Semantic Scholar: %d unique papers collected", len(seen))
         return list(seen.values())
 
     # ------------------------------------------------------------------
