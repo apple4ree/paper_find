@@ -26,6 +26,12 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      fresh:
+        description: "Disable cross-run dedup — show all matched papers (useful for rebuilding)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 jobs:
   digest:
@@ -76,6 +82,9 @@ jobs:
           fi
           if [ "${{ github.event.inputs.skip_s2 }}" = "true" ]; then
             SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
+          fi
+          if [ "${{ github.event.inputs.fresh }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --fresh"
           fi
           python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
 

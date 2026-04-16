@@ -5,8 +5,9 @@ Conferences: AAAI, NeurIPS, ICML, ICLR, CVPR, KDD + HuggingFace
 
 Usage
 -----
-  python main.py                       # today's papers
+  python main.py                       # today's papers (cross-run dedup on)
   python main.py --date 2025-04-10     # specific date
+  python main.py --fresh               # skip history dedup (show all papers)
   python main.py --skip-arxiv          # skip the (slow) arXiv scraper
   python main.py --skip-s2             # skip Semantic Scholar
   python main.py --skip-hf             # skip HuggingFace
@@ -21,7 +22,6 @@ import sys
 from collections import Counter
 from datetime import date
 from pathlib import Path
-from typing import List
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,8 +30,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 # ---------------------------------------------------------------------------
-# Entry point
+# CLI
 # ---------------------------------------------------------------------------
 
 def parse_args() -> argparse.Namespace:
@@ -47,20 +48,17 @@ def parse_args() -> argparse.Namespace:
         help="Directory where markdown reports are written.",
     )
     p.add_argument(
-        "--skip-hf",
+        "--fresh",
         action="store_true",
-        help="Skip the HuggingFace scraper.",
+        help=(
+            "Disable cross-run deduplication — include ALL matched papers "
+            "even if they appeared in previous digests. "
+            "Useful for rebuilding a specific date."
+        ),
     )
-    p.add_argument(
-        "--skip-s2",
-        action="store_true",
-        help="Skip the Semantic Scholar scraper.",
-    )
-    p.add_argument(
-        "--skip-arxiv",
-        action="store_true",
-        help="Skip the arXiv scraper.",
-    )
+    p.add_argument("--skip-hf",    action="store_true", help="Skip HuggingFace scraper.")
+    p.add_argument("--skip-s2",    action="store_true", help="Skip Semantic Scholar scraper.")
+    p.add_argument("--skip-arxiv", action="store_true", help="Skip arXiv scraper.")
     p.add_argument(
         "--s2-key",
         default=os.environ.get("SS_API_KEY", ""),
@@ -68,6 +66,10 @@ def parse_args() -> argparse.Namespace:
     )
     return p.parse_args()
 
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
 def main() -> int:
     args = parse_args()
@@ -115,10 +117,66 @@ def main() -> int:
     if not all_papers:
         logger.warning("No papers collected — check network access and try again.")
 
-    # ---- Process -----------------------------------------------------------
+    # ---- Process (within-run dedup + topic assignment) ---------------------
     logger.info("=== Processing %d raw papers ===", len(all_papers))
     from src.processor import PaperProcessor
     categorized = PaperProcessor().process(all_papers)
+
+    # ---- Cross-run deduplication (skip if --fresh) -------------------------
+    history_file = output_dir / "seen_papers.json"
+    total_skipped = 0
+
+    if args.fresh:
+        logger.info("--fresh flag set: skipping cross-run deduplication")
+    else:
+        from src.history import SeenPapersHistory
+        history = SeenPapersHistory(history_file)
+
+        # Collect all unique paper objects across topics
+        all_categorized_papers = {
+            id(p): p
+            for plist in categorized.values()
+            for p in plist
+        }
+
+        # Filter each topic bucket
+        for topic in list(categorized.keys()):
+            new_papers, skipped = history.filter_new(categorized[topic])
+            total_skipped += skipped
+            categorized[topic] = new_papers
+
+        # Deduplicate skipped count (a paper in 2 topics counts once)
+        # Recalculate by checking which papers survive across all topics
+        surviving_ids = {
+            p.get_id()
+            for plist in categorized.values()
+            for p in plist
+        }
+        all_ids = {p.get_id() for p in all_categorized_papers.values()}
+        total_skipped = len(all_ids) - len(surviving_ids)
+
+        logger.info(
+            "Cross-run dedup: skipped %d already-reported papers", total_skipped
+        )
+
+        # Gather surviving papers (unique objects) to add to history
+        new_paper_objects = [
+            p
+            for plist in categorized.values()
+            for p in plist
+        ]
+        # Deduplicate the list itself before adding to history
+        seen_in_loop: set[str] = set()
+        unique_new: list = []
+        for p in new_paper_objects:
+            pid = p.get_id()
+            if pid not in seen_in_loop:
+                seen_in_loop.add(pid)
+                unique_new.append(p)
+
+        history.add_papers(unique_new, target_date)
+        history.prune(target_date)
+        history.save()
 
     # ---- Format & save -----------------------------------------------------
     from src.formatter import PaperFormatter
@@ -130,11 +188,13 @@ def main() -> int:
     date_file.write_text(report, encoding="utf-8")
     latest_file.write_text(report, encoding="utf-8")
 
-    total = sum(len(v) for v in categorized.values())
-    unique = len({id(p) for plist in categorized.values() for p in plist})
-    logger.info("Report written → %s  (%d unique papers)", date_file, unique)
+    total_entries = sum(len(v) for v in categorized.values())
+    unique_count = len({id(p) for plist in categorized.values() for p in plist})
+    logger.info(
+        "Report written → %s  (%d unique new papers)", date_file, unique_count
+    )
 
-    # Print a summary to stdout
+    # ---- Stdout summary ----------------------------------------------------
     print(f"\n{'='*60}")
     print(f"  Daily Paper Digest  {target_date}")
     print(f"{'='*60}")
@@ -152,15 +212,19 @@ def main() -> int:
         print(f"  {label:<25} {cnt:>5}")
     print(f"  {'─'*35}")
     print(f"  {'Total raw':<25} {len(all_papers):>5}")
+    if not args.fresh:
+        print(f"  {'Already reported':<25} {total_skipped:>5}  ← cross-run dedup")
 
-    print(f"\n  {'Topic':<15} {'Papers':>7}")
-    print(f"  {'-'*25}")
+    print(f"\n  {'Topic':<15} {'New papers':>10}")
+    print(f"  {'-'*28}")
     for topic, papers in categorized.items():
-        print(f"  {topic:<15} {len(papers):>7}")
-    print(f"  {'─'*25}")
-    print(f"  {'Unique total':<15} {unique:>7}")
+        print(f"  {topic:<15} {len(papers):>10}")
+    print(f"  {'─'*28}")
+    print(f"  {'Unique new':<15} {unique_count:>10}")
 
     print(f"\n  Output: {date_file}")
+    if not args.fresh:
+        print(f"  History: {history_file}")
     print(f"{'='*60}")
 
     return 0
