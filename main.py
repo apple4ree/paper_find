@@ -9,6 +9,7 @@ Usage
   python main.py --date 2025-04-10     # specific date
   python main.py --skip-arxiv          # skip the (slow) arXiv scraper
   python main.py --skip-s2             # skip Semantic Scholar
+  python main.py --skip-hf             # skip HuggingFace
   python main.py --s2-key <key>        # use an S2 API key for higher limits
 """
 from __future__ import annotations
@@ -17,8 +18,10 @@ import argparse
 import logging
 import os
 import sys
+from collections import Counter
 from datetime import date
 from pathlib import Path
+from typing import List
 
 logging.basicConfig(
     level=logging.INFO,
@@ -79,14 +82,17 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     all_papers = []
+    source_counts: Counter = Counter()
 
     # ---- HuggingFace -------------------------------------------------------
     if not args.skip_hf:
-        logger.info("=== HuggingFace Daily Papers ===")
+        logger.info("=== HuggingFace Papers ===")
         from src.scrapers.huggingface import HuggingFaceScraper
         hf_papers = HuggingFaceScraper().fetch(target_date)
         logger.info("  collected %d papers", len(hf_papers))
         all_papers.extend(hf_papers)
+        for p in hf_papers:
+            source_counts[p.source] += 1
 
     # ---- Semantic Scholar --------------------------------------------------
     if not args.skip_s2:
@@ -95,6 +101,7 @@ def main() -> int:
         ss_papers = SemanticScholarScraper(api_key=args.s2_key or None).fetch()
         logger.info("  collected %d papers", len(ss_papers))
         all_papers.extend(ss_papers)
+        source_counts["semantic_scholar"] += len(ss_papers)
 
     # ---- arXiv -------------------------------------------------------------
     if not args.skip_arxiv:
@@ -103,6 +110,7 @@ def main() -> int:
         arxiv_papers = ArxivScraper().fetch(target_date)
         logger.info("  collected %d papers", len(arxiv_papers))
         all_papers.extend(arxiv_papers)
+        source_counts["arxiv"] += len(arxiv_papers)
 
     if not all_papers:
         logger.warning("No papers collected — check network access and try again.")
@@ -123,18 +131,37 @@ def main() -> int:
     latest_file.write_text(report, encoding="utf-8")
 
     total = sum(len(v) for v in categorized.values())
-    logger.info("Report written → %s  (%d papers)", date_file, total)
+    unique = len({id(p) for plist in categorized.values() for p in plist})
+    logger.info("Report written → %s  (%d unique papers)", date_file, unique)
 
-    # Print a brief summary to stdout
+    # Print a summary to stdout
     print(f"\n{'='*60}")
     print(f"  Daily Paper Digest  {target_date}")
     print(f"{'='*60}")
+
+    print(f"\n  {'Source':<25} {'Raw':>5}")
+    print(f"  {'-'*35}")
+    source_label = {
+        "huggingface":        "HuggingFace (daily)",
+        "huggingface_search": "HuggingFace (search)",
+        "semantic_scholar":   "Semantic Scholar",
+        "arxiv":              "arXiv",
+    }
+    for src, cnt in sorted(source_counts.items(), key=lambda x: -x[1]):
+        label = source_label.get(src, src)
+        print(f"  {label:<25} {cnt:>5}")
+    print(f"  {'─'*35}")
+    print(f"  {'Total raw':<25} {len(all_papers):>5}")
+
+    print(f"\n  {'Topic':<15} {'Papers':>7}")
+    print(f"  {'-'*25}")
     for topic, papers in categorized.items():
-        print(f"  {topic:<10}  {len(papers):3d} papers")
-    print(f"{'─'*60}")
-    print(f"  {'Total':<10}  {total:3d} papers")
+        print(f"  {topic:<15} {len(papers):>7}")
+    print(f"  {'─'*25}")
+    print(f"  {'Unique total':<15} {unique:>7}")
+
+    print(f"\n  Output: {date_file}")
     print(f"{'='*60}")
-    print(f"  Output: {date_file}")
 
     return 0
 

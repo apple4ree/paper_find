@@ -1,11 +1,13 @@
 name: Daily Paper Digest
 
 on:
-  # Every day at 06:00 UTC (= 15:00 KST)
+  # Every day at 09:00 UTC (= 18:00 KST)
+  # HuggingFace publishes its daily paper list around 08:00 UTC,
+  # so 09:00 UTC ensures we always capture today's curated papers.
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "0 9 * * *"
 
-  # Allow manual trigger with an optional date override
+  # Allow manual trigger with optional overrides
   workflow_dispatch:
     inputs:
       date:
@@ -13,7 +15,13 @@ on:
         required: false
         type: string
       skip_arxiv:
-        description: "Skip arXiv scraper (faster run)"
+        description: "Skip arXiv scraper (faster run, fewer papers)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+      skip_s2:
+        description: "Skip Semantic Scholar scraper"
         required: false
         default: "false"
         type: choice
@@ -65,6 +73,9 @@ jobs:
           SKIP_FLAGS=""
           if [ "${{ github.event.inputs.skip_arxiv }}" = "true" ]; then
             SKIP_FLAGS="$SKIP_FLAGS --skip-arxiv"
+          fi
+          if [ "${{ github.event.inputs.skip_s2 }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
           fi
           python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
 

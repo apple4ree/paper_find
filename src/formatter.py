@@ -12,9 +12,10 @@ from .models import Paper
 _CONF_ORDER = ["AAAI", "NeurIPS", "ICML", "ICLR", "CVPR", "KDD"]
 
 _SOURCE_BADGE = {
-    "huggingface": "HuggingFace Featured",
-    "arxiv": "arXiv",
-    "semantic_scholar": "Semantic Scholar",
+    "huggingface":        "HuggingFace Featured",
+    "huggingface_search": "HuggingFace",
+    "arxiv":              "arXiv",
+    "semantic_scholar":   "Semantic Scholar",
 }
 
 
@@ -106,6 +107,8 @@ class PaperFormatter:
             meta.append(f"**{p.conference}{year}**")
         if p.source == "huggingface":
             meta.append("🤗 Featured")
+        elif p.source == "huggingface_search":
+            meta.append("🤗")
         if p.published_date:
             meta.append(f"`{p.published_date}`")
 
