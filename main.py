@@ -10,6 +10,7 @@ Usage
   python main.py --skip-arxiv          # skip the (slow) arXiv scraper
   python main.py --skip-s2             # skip Semantic Scholar
   python main.py --skip-hf             # skip HuggingFace
+  python main.py --skip-openreview     # skip OpenReview (ICLR/NeurIPS/ICML)
   python main.py --s2-key <key>        # use an S2 API key for higher limits
 """
 from __future__ import annotations
@@ -62,6 +63,11 @@ def parse_args() -> argparse.Namespace:
         help="Skip the arXiv scraper.",
     )
     p.add_argument(
+        "--skip-openreview",
+        action="store_true",
+        help="Skip the OpenReview scraper (ICLR / NeurIPS / ICML).",
+    )
+    p.add_argument(
         "--s2-key",
         default=os.environ.get("SS_API_KEY", ""),
         help="Semantic Scholar API key (or set SS_API_KEY env var).",
@@ -112,6 +118,15 @@ def main() -> int:
         all_papers.extend(arxiv_papers)
         source_counts["arxiv"] += len(arxiv_papers)
 
+    # ---- OpenReview --------------------------------------------------------
+    if not args.skip_openreview:
+        logger.info("=== OpenReview (ICLR / NeurIPS / ICML) ===")
+        from src.scrapers.openreview import OpenReviewScraper
+        or_papers = OpenReviewScraper().fetch()
+        logger.info("  collected %d papers", len(or_papers))
+        all_papers.extend(or_papers)
+        source_counts["openreview"] += len(or_papers)
+
     if not all_papers:
         logger.warning("No papers collected — check network access and try again.")
 
@@ -144,6 +159,7 @@ def main() -> int:
     source_label = {
         "huggingface":        "HuggingFace (daily)",
         "huggingface_search": "HuggingFace (search)",
+        "openreview":         "OpenReview (ICLR/NeurIPS/ICML)",
         "semantic_scholar":   "Semantic Scholar",
         "arxiv":              "arXiv",
     }

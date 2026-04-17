@@ -14,9 +14,10 @@ logger = logging.getLogger(__name__)
 # Source display priority (lower = shown first in output)
 _SOURCE_PRIORITY = {
     "huggingface": 0,
-    "huggingface_search": 1,
-    "arxiv": 2,
-    "semantic_scholar": 3,
+    "openreview": 1,        # conference-accepted papers rank highly
+    "huggingface_search": 2,
+    "arxiv": 3,
+    "semantic_scholar": 4,
 }
 
 
@@ -80,11 +81,9 @@ def _deduplicate(papers: List[Paper]) -> List[Paper]:
                 existing.year = p.year
             if p.published_date and not existing.published_date:
                 existing.published_date = p.published_date
-            # Prefer HuggingFace daily source when merging
-            if p.source == "huggingface":
-                existing.source = "huggingface"
-            elif p.source == "huggingface_search" and existing.source not in ("huggingface",):
-                existing.source = "huggingface_search"
+            # Prefer higher-priority source when merging duplicates
+            if _SOURCE_PRIORITY.get(p.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
+                existing.source = p.source
     return list(seen.values())
 
 

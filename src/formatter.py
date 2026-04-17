@@ -14,6 +14,7 @@ _CONF_ORDER = ["AAAI", "NeurIPS", "ICML", "ICLR", "CVPR", "KDD"]
 _SOURCE_BADGE = {
     "huggingface":        "HuggingFace Featured",
     "huggingface_search": "HuggingFace",
+    "openreview":         "OpenReview",
     "arxiv":              "arXiv",
     "semantic_scholar":   "Semantic Scholar",
 }
@@ -37,7 +38,7 @@ class PaperFormatter:
             "",
             "| Source | Topics |",
             "|--------|--------|",
-            "| AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · HuggingFace | Agent · Harness · Finance |",
+            "| AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview | Agent · Harness · Finance |",
             "",
             (
                 f"**{unique_count} unique papers** "
@@ -109,6 +110,8 @@ class PaperFormatter:
             meta.append("🤗 Featured")
         elif p.source == "huggingface_search":
             meta.append("🤗")
+        elif p.source == "openreview":
+            meta.append("OpenReview")
         if p.published_date:
             meta.append(f"`{p.published_date}`")
 
@@ -130,7 +133,7 @@ class PaperFormatter:
             "---",
             (
                 f"*Generated {target_date} · "
-                "Sources: HuggingFace Daily Papers, Semantic Scholar, arXiv*"
+                "Sources: HuggingFace Daily Papers, OpenReview, Semantic Scholar, arXiv*"
             ),
             "",
         ]

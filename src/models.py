@@ -17,7 +17,7 @@ class Paper:
     arxiv_id: Optional[str] = None
     conference: Optional[str] = None
     year: Optional[int] = None
-    # 'huggingface' | 'semantic_scholar' | 'arxiv'
+    # 'huggingface' | 'huggingface_search' | 'openreview' | 'semantic_scholar' | 'arxiv'
     source: str = ""
     topics: List[str] = field(default_factory=list)
     published_date: Optional[date] = None
