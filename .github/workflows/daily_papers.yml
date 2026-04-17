@@ -26,6 +26,12 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      skip_openreview:
+        description: "Skip OpenReview scraper (ICLR/NeurIPS/ICML)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 jobs:
   digest:
@@ -76,6 +82,9 @@ jobs:
           fi
           if [ "${{ github.event.inputs.skip_s2 }}" = "true" ]; then
             SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
+          fi
+          if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
           fi
           python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
 
