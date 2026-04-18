@@ -32,6 +32,12 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      skip_cvf:
+        description: "Skip CVF OpenAccess scraper (CVPR)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 jobs:
   digest:
@@ -85,6 +91,9 @@ jobs:
           fi
           if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
             SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
+          fi
+          if [ "${{ github.event.inputs.skip_cvf }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-cvf"
           fi
           python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
 

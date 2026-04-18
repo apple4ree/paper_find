@@ -100,6 +100,17 @@ TOPICS = {
         "agent task",
         "agent environment",
         "agentic ai",
+        # Visual / embodied agents (important for CVPR)
+        "visual agent",
+        "vision agent",
+        "vision language agent",
+        "robotic agent",
+        "navigation agent",
+        "visual navigation",
+        "embodied ai",
+        "embodied intelligence",
+        "robot learning",
+        "manipulation agent",
     ],
     "Harness": [
         "harness",
@@ -180,8 +191,9 @@ ARXIV_CATEGORIES = [
     "cs.AI",    # Artificial Intelligence
     "cs.LG",    # Machine Learning
     "cs.CL",    # Computation and Language (NLP)
-    "cs.CV",    # Computer Vision
+    "cs.CV",    # Computer Vision (CVPR/ECCV papers)
     "cs.MA",    # Multi-Agent Systems
+    "cs.RO",    # Robotics (embodied agents, CVPR territory)
     "q-fin.TR", # Trading and Market Microstructure
     "q-fin.PM", # Portfolio Management
     "q-fin.RM", # Risk Management

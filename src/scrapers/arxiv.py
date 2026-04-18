@@ -42,6 +42,10 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "agentic",
         "tool use",
         "autonomous agent",
+        "embodied agent",
+        "visual agent",
+        "gui agent",
+        "web agent",
     ],
     "Harness": [
         "harness",
@@ -62,9 +66,11 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
 }
 
 # ArXiv categories grouped by topic affinity
+# NOTE: cs.CV is critical for CVPR-submitted papers about visual/embodied agents.
+# cs.RO covers robotics and embodied AI (also CVPR/ICLR territory).
 TOPIC_CATEGORIES: Dict[str, List[str]] = {
-    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
-    "Harness": ["cs.AI", "cs.LG", "cs.CL"],
+    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA", "cs.CV", "cs.RO"],
+    "Harness": ["cs.AI", "cs.LG", "cs.CL", "cs.CV"],
     "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP"],
 }
 

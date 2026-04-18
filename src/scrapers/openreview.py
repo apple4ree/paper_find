@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
 _DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
-_LIMIT = 25     # results per search call
+_LIMIT = 100    # results per search call (was 25; raised for better coverage)
 
 _CUR_YEAR = date.today().year
 
@@ -52,6 +52,10 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "multi-agent",
         "agentic",
         "tool use",
+        "embodied agent",
+        "gui agent",
+        "web agent",
+        "vision language agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -59,6 +63,7 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "llm evaluation",
         "benchmark",
         "evaluation framework",
+        "evaluation suite",
     ],
     "Finance": [
         "financial",
@@ -66,6 +71,7 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "portfolio",
         "fraud detection",
         "cryptocurrency",
+        "fintech",
     ],
 }
 

@@ -33,9 +33,9 @@ SEARCH_LIMIT = 50        # Papers per topic search query
 
 # Representative search terms per topic for the HuggingFace search API
 HF_TOPIC_QUERIES: dict[str, list[str]] = {
-    "Agent": ["llm agent", "autonomous agent", "multi-agent", "agentic"],
-    "Harness": ["evaluation harness", "lm eval", "llm benchmark"],
-    "Finance": ["financial llm", "stock prediction", "portfolio optimization", "algorithmic trading"],
+    "Agent": ["llm agent", "autonomous agent", "multi-agent", "agentic", "embodied agent", "gui agent"],
+    "Harness": ["evaluation harness", "lm eval", "llm benchmark", "evaluation framework"],
+    "Finance": ["financial llm", "stock prediction", "portfolio optimization", "algorithmic trading", "fintech"],
 }
 
 

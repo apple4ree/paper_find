@@ -41,6 +41,11 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        "embodied agent",
+        "vision language agent",
+        "visual agent",
+        "robotic agent",
+        "navigation agent",
     ],
     "Harness": [
         "evaluation harness",

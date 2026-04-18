@@ -11,6 +11,7 @@ Usage
   python main.py --skip-s2             # skip Semantic Scholar
   python main.py --skip-hf             # skip HuggingFace
   python main.py --skip-openreview     # skip OpenReview (ICLR/NeurIPS/ICML)
+  python main.py --skip-cvf            # skip CVF OpenAccess (CVPR)
   python main.py --s2-key <key>        # use an S2 API key for higher limits
 """
 from __future__ import annotations
@@ -66,6 +67,11 @@ def parse_args() -> argparse.Namespace:
         "--skip-openreview",
         action="store_true",
         help="Skip the OpenReview scraper (ICLR / NeurIPS / ICML).",
+    )
+    p.add_argument(
+        "--skip-cvf",
+        action="store_true",
+        help="Skip the CVF OpenAccess scraper (CVPR).",
     )
     p.add_argument(
         "--s2-key",
@@ -127,6 +133,15 @@ def main() -> int:
         all_papers.extend(or_papers)
         source_counts["openreview"] += len(or_papers)
 
+    # ---- CVF OpenAccess (CVPR) ---------------------------------------------
+    if not args.skip_cvf:
+        logger.info("=== CVF OpenAccess (CVPR) ===")
+        from src.scrapers.cvf import CVFScraper
+        cvf_papers = CVFScraper().fetch()
+        logger.info("  collected %d papers", len(cvf_papers))
+        all_papers.extend(cvf_papers)
+        source_counts["cvf"] += len(cvf_papers)
+
     if not all_papers:
         logger.warning("No papers collected — check network access and try again.")
 
@@ -162,6 +177,7 @@ def main() -> int:
         "openreview":         "OpenReview (ICLR/NeurIPS/ICML)",
         "semantic_scholar":   "Semantic Scholar",
         "arxiv":              "arXiv",
+        "cvf":                "CVF OpenAccess (CVPR)",
     }
     for src, cnt in sorted(source_counts.items(), key=lambda x: -x[1]):
         label = source_label.get(src, src)
