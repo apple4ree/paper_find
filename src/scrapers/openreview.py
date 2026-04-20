@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
 _DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
-_LIMIT = 25     # results per search call
+_LIMIT = 50     # results per search call
 
 _CUR_YEAR = date.today().year
 
@@ -93,20 +93,16 @@ class OpenReviewScraper:
                     for query in queries:
                         try:
                             batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
+                            new_count = 0
                             for p in batch:
                                 pid = p.get_id()
                                 if pid not in seen:
                                     seen[pid] = p
+                                    new_count += 1
                             if batch:
                                 logger.debug(
-                                    "OpenReview [%s %s / '%s']: %d",
-                                    conf_name, year or "?", query, len(batch),
+                                    "OpenReview [%s %s / '%s']: %d (%d new)",
+                                    conf_name, year or "?", query, len(batch), new_count,
                                 )
                         except Exception as exc:
                             logger.warning(

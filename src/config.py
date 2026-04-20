@@ -35,6 +35,7 @@ CONFERENCES = {
         "IEEE/CVF Conference",
         "IEEE Conference on Computer Vision",
         "CVPR 20",
+        "cvpr20",
     ],
     "KDD": [
         "KDD",
@@ -42,6 +43,8 @@ CONFERENCES = {
         "ACM SIGKDD",
         "SIGKDD",
         "ACM KDD",
+        "KDD 20",
+        "kdd20",
     ],
     "ACL": [
         "ACL",

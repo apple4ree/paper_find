@@ -42,6 +42,10 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "agentic",
         "tool use",
         "autonomous agent",
+        "embodied agent",
+        "visual agent",
+        "multimodal agent",
+        "gui agent",
     ],
     "Harness": [
         "harness",
@@ -49,6 +53,8 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "evaluation framework",
         "llm benchmark",
         "evaluation suite",
+        "visual benchmark",
+        "multimodal benchmark",
     ],
     "Finance": [
         "financial",
@@ -58,13 +64,15 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "fraud detection",
         "cryptocurrency",
         "fintech",
+        "financial forecasting",
+        "credit risk",
     ],
 }
 
 # ArXiv categories grouped by topic affinity
 TOPIC_CATEGORIES: Dict[str, List[str]] = {
-    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
-    "Harness": ["cs.AI", "cs.LG", "cs.CL"],
+    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA", "cs.CV"],
+    "Harness": ["cs.AI", "cs.LG", "cs.CL", "cs.CV"],
     "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP"],
 }
 
