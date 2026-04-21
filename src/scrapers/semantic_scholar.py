@@ -41,6 +41,13 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        # CVPR / embodied / visual agent terms
+        "embodied agent",
+        "embodied ai",
+        "visual navigation agent",
+        "vision-language agent",
+        "robot manipulation learning",
+        "multimodal agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +57,12 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        # Vision / multimodal evaluation terms (CVPR-relevant)
+        "visual benchmark",
+        "multimodal benchmark",
+        "multimodal evaluation framework",
+        "perception benchmark",
+        "video understanding benchmark",
     ],
     "Finance": [
         "financial large language model",
@@ -62,6 +75,12 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        # Additional finance terms (KDD-relevant)
+        "financial time series",
+        "market forecasting deep learning",
+        "risk management machine learning",
+        "financial graph neural network",
+        "payment fraud detection",
     ],
 }
 

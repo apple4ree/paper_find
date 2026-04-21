@@ -96,6 +96,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add output/
+          # Only commit when the digest actually changed
           git diff --staged --quiet || \
-            git commit -m "digest: daily paper report ${{ steps.date.outputs.value }}"
-          git push
+            git commit -m "digest: daily paper report ${{ steps.date.outputs.value }} [skip ci]"
+          git push origin HEAD

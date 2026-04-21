@@ -52,6 +52,9 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "multi-agent",
         "agentic",
         "tool use",
+        "embodied agent",
+        "vision-language agent",
+        "multimodal agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -59,6 +62,8 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "llm evaluation",
         "benchmark",
         "evaluation framework",
+        "multimodal benchmark",
+        "evaluation suite",
     ],
     "Finance": [
         "financial",
@@ -66,6 +71,8 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "portfolio",
         "fraud detection",
         "cryptocurrency",
+        "financial forecasting",
+        "credit risk",
     ],
 }
 
@@ -93,20 +100,16 @@ class OpenReviewScraper:
                     for query in queries:
                         try:
                             batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
+                            new_count = 0
                             for p in batch:
                                 pid = p.get_id()
                                 if pid not in seen:
                                     seen[pid] = p
+                                    new_count += 1
                             if batch:
                                 logger.debug(
-                                    "OpenReview [%s %s / '%s']: %d",
-                                    conf_name, year or "?", query, len(batch),
+                                    "OpenReview [%s %s / '%s']: %d (%d new)",
+                                    conf_name, year or "?", query, len(batch), new_count,
                                 )
                         except Exception as exc:
                             logger.warning(

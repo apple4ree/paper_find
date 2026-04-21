@@ -42,6 +42,13 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "agentic",
         "tool use",
         "autonomous agent",
+        # CVPR / embodied / vision-language agent terms
+        "embodied agent",
+        "visual agent",
+        "vision-language agent",
+        "visual navigation",
+        "embodied navigation",
+        "robot manipulation",
     ],
     "Harness": [
         "harness",
@@ -49,6 +56,11 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "evaluation framework",
         "llm benchmark",
         "evaluation suite",
+        # Vision / multimodal evaluation terms
+        "visual benchmark",
+        "multimodal benchmark",
+        "multimodal evaluation",
+        "perception evaluation",
     ],
     "Finance": [
         "financial",
@@ -58,14 +70,24 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "fraud detection",
         "cryptocurrency",
         "fintech",
+        "credit risk",
+        "market prediction",
+        "financial forecasting",
     ],
 }
 
 # ArXiv categories grouped by topic affinity
 TOPIC_CATEGORIES: Dict[str, List[str]] = {
-    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
-    "Harness": ["cs.AI", "cs.LG", "cs.CL"],
-    "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP"],
+    # cs.CV added: many CVPR agent papers (embodied, visual navigation) appear here
+    # cs.RO added: robotics / embodied agent papers
+    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA", "cs.CV", "cs.RO"],
+    # cs.CV added: multimodal / visual benchmark papers
+    "Harness": ["cs.AI", "cs.LG", "cs.CL", "cs.CV"],
+    "Finance": [
+        "cs.AI", "cs.LG",
+        "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP", "q-fin.GN",
+        "econ.GN", "econ.EM",
+    ],
 }
 
 

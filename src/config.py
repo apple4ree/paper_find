@@ -90,6 +90,8 @@ TOPICS = {
         "computer use",
         "gui agent",
         "embodied agent",
+        "embodied ai",
+        "embodied intelligence",
         "planning agent",
         "reflection agent",
         "agent benchmark",
@@ -100,6 +102,20 @@ TOPICS = {
         "agent task",
         "agent environment",
         "agentic ai",
+        # CVPR / vision-language agent terms
+        "visual agent",
+        "vision-language agent",
+        "vision language model agent",
+        "visual navigation",
+        "embodied navigation",
+        "robot agent",
+        "robotic agent",
+        "manipulation policy",
+        "vision agent",
+        "multimodal agent",
+        "vision-based agent",
+        "instruction following",
+        "task planning robot",
     ],
     "Harness": [
         "harness",
@@ -124,6 +140,19 @@ TOPICS = {
         "safety evaluation",
         "model assessment",
         "evaluation methodology",
+        # CVPR / vision evaluation terms
+        "visual benchmark",
+        "vision benchmark",
+        "perception benchmark",
+        "multimodal benchmark",
+        "multimodal evaluation",
+        "object detection benchmark",
+        "visual question answering benchmark",
+        "vqa benchmark",
+        "image captioning evaluation",
+        "video benchmark",
+        "leaderboard",
+        "evaluation dataset",
     ],
     "Finance": [
         "finance",
@@ -170,6 +199,31 @@ TOPICS = {
         "finllm",
         "economic forecasting",
         "sentiment analysis stock",
+        # Additional finance terms
+        "lending",
+        "loan default",
+        "credit scoring",
+        "insurance",
+        "actuarial",
+        "risk assessment",
+        "financial forecasting",
+        "market sentiment",
+        "economic indicator",
+        "gdp prediction",
+        "inflation prediction",
+        "financial regulation",
+        "regulatory compliance",
+        "kyc",
+        "know your customer",
+        "wealth management",
+        "financial planning",
+        "financial risk",
+        "market volatility",
+        "return prediction",
+        "price prediction",
+        "financial time series",
+        "payment fraud",
+        "transaction fraud",
     ],
 }
 
@@ -182,12 +236,15 @@ ARXIV_CATEGORIES = [
     "cs.CL",    # Computation and Language (NLP)
     "cs.CV",    # Computer Vision
     "cs.MA",    # Multi-Agent Systems
+    "cs.RO",    # Robotics (embodied agents)
     "q-fin.TR", # Trading and Market Microstructure
     "q-fin.PM", # Portfolio Management
     "q-fin.RM", # Risk Management
     "q-fin.ST", # Statistical Finance
     "q-fin.CP", # Computational Finance
+    "q-fin.GN", # General Finance
     "econ.GN",  # General Economics
+    "econ.EM",  # Econometrics
 ]
 
 # Semantic Scholar fields to retrieve
