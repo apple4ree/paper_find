@@ -31,6 +31,7 @@ _DELAY_WITH_KEY = 0.5
 # Representative search terms per topic — broad enough to catch most papers
 TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     "Agent": [
+        # LLM / language-model agents
         "llm agent",
         "language model agent",
         "autonomous agent",
@@ -41,6 +42,18 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        # CVPR-relevant embodied / vision agents
+        "embodied agent",
+        "embodied navigation",
+        "robotic manipulation language",
+        "vision language agent",
+        "visual agent",
+        "computer use agent",
+        "vision-language planning",
+        # General agent planning
+        "agent planning reasoning",
+        "task planning agent",
+        "agent benchmark",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +63,8 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        "safety evaluation benchmark",
+        "model evaluation framework",
     ],
     "Finance": [
         "financial large language model",
@@ -62,6 +77,13 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        # KDD-relevant finance topics
+        "financial time series",
+        "financial graph neural network",
+        "risk prediction finance",
+        "anti-money laundering",
+        "market prediction deep learning",
+        "financial anomaly detection",
     ],
 }
 
