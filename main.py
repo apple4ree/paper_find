@@ -12,6 +12,8 @@ Usage
   python main.py --skip-hf             # skip HuggingFace
   python main.py --skip-openreview     # skip OpenReview (ICLR/NeurIPS/ICML)
   python main.py --skip-cvf            # skip CVF OpenAccess (CVPR)
+  python main.py --no-history-dedup    # do NOT filter out previously-seen papers
+  python main.py --reset-history       # clear cross-run seen-paper store
   python main.py --s2-key <key>        # use an S2 API key for higher limits
 """
 from __future__ import annotations
@@ -72,6 +74,23 @@ def parse_args() -> argparse.Namespace:
         "--skip-cvf",
         action="store_true",
         help="Skip the CVF OpenAccess scraper (CVPR).",
+    )
+    p.add_argument(
+        "--no-history-dedup",
+        action="store_true",
+        help=(
+            "Disable cross-run deduplication.  By default, papers that "
+            "appeared in any previous digest are filtered out so each daily "
+            "report only contains newly-discovered papers."
+        ),
+    )
+    p.add_argument(
+        "--reset-history",
+        action="store_true",
+        help=(
+            "Delete the seen-papers database before running.  Useful to "
+            "regenerate a full digest after changing topic filters."
+        ),
     )
     p.add_argument(
         "--s2-key",
@@ -149,6 +168,19 @@ def main() -> int:
     logger.info("=== Processing %d raw papers ===", len(all_papers))
     from src.processor import PaperProcessor
     categorized = PaperProcessor().process(all_papers)
+
+    # ---- Cross-run deduplication (remove papers seen in previous digests) --
+    history_path = output_dir / ".seen_papers.json"
+    if args.reset_history and history_path.exists():
+        history_path.unlink()
+        logger.info("Deleted seen-papers db at %s", history_path)
+
+    if not args.no_history_dedup:
+        logger.info("=== Cross-run deduplication ===")
+        from src.history import SeenPapersDB
+        history = SeenPapersDB(history_path, output_dir=output_dir)
+        categorized = history.filter_new(categorized, target_date)
+        history.save()
 
     # ---- Format & save -----------------------------------------------------
     from src.formatter import PaperFormatter
