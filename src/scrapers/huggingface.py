@@ -40,9 +40,15 @@ HF_TOPIC_QUERIES: dict[str, list[str]] = {
 
 
 class HuggingFaceScraper:
-    def __init__(self, session: Optional[requests.Session] = None):
+    def __init__(
+        self,
+        session: Optional[requests.Session] = None,
+        hf_token: Optional[str] = None,
+    ):
         self.session = session or requests.Session()
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        if hf_token:
+            self.session.headers["Authorization"] = f"Bearer {hf_token}"
 
     def fetch(self, target_date: date) -> List[Paper]:
         """Return HuggingFace papers for *target_date*.
