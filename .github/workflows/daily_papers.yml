@@ -1,13 +1,12 @@
 name: Daily Paper Digest
 
 on:
-  # Every day at 09:00 UTC (= 18:00 KST)
-  # HuggingFace publishes its daily paper list around 08:00 UTC,
-  # so 09:00 UTC ensures we always capture today's curated papers.
+  # 09:00 UTC = 18:00 KST  — HuggingFace daily papers are published ~08:00 UTC
+  # 21:00 UTC = 06:00 KST  — second run catches papers added later in the day
   schedule:
     - cron: "0 9 * * *"
+    - cron: "0 21 * * *"
 
-  # Allow manual trigger with optional overrides
   workflow_dispatch:
     inputs:
       date:
@@ -15,7 +14,7 @@ on:
         required: false
         type: string
       skip_arxiv:
-        description: "Skip arXiv scraper (faster run, fewer papers)"
+        description: "Skip arXiv scraper (faster run)"
         required: false
         default: "false"
         type: choice
@@ -32,25 +31,31 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      skip_cvf:
+        description: "Skip CVF OpenAccess scraper (CVPR)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+      skip_aaai:
+        description: "Skip AAAI Digital Library scraper"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 jobs:
   digest:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to push the report back to the repo
+      contents: write
 
     steps:
-      # ------------------------------------------------------------------ #
-      # 1. Checkout
-      # ------------------------------------------------------------------ #
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ------------------------------------------------------------------ #
-      # 2. Python
-      # ------------------------------------------------------------------ #
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -60,9 +65,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # ------------------------------------------------------------------ #
-      # 3. Build digest
-      # ------------------------------------------------------------------ #
       - name: Determine target date
         id: date
         run: |
@@ -77,20 +79,13 @@ jobs:
           SS_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
         run: |
           SKIP_FLAGS=""
-          if [ "${{ github.event.inputs.skip_arxiv }}" = "true" ]; then
-            SKIP_FLAGS="$SKIP_FLAGS --skip-arxiv"
-          fi
-          if [ "${{ github.event.inputs.skip_s2 }}" = "true" ]; then
-            SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
-          fi
-          if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
-            SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
-          fi
+          [ "${{ github.event.inputs.skip_arxiv }}"    = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-arxiv"
+          [ "${{ github.event.inputs.skip_s2 }}"       = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
+          [ "${{ github.event.inputs.skip_openreview }}" = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
+          [ "${{ github.event.inputs.skip_cvf }}"      = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-cvf"
+          [ "${{ github.event.inputs.skip_aaai }}"     = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-aaai"
           python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
 
-      # ------------------------------------------------------------------ #
-      # 4. Commit & push the report
-      # ------------------------------------------------------------------ #
       - name: Commit report
         run: |
           git config user.name  "github-actions[bot]"

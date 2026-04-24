@@ -41,6 +41,11 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        "embodied agent",
+        "agent benchmark",
+        "agent reasoning",
+        "agent planning language model",
+        "computer use agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +55,10 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        "llm benchmark",
+        "safety benchmark language model",
+        "reasoning benchmark",
+        "hallucination evaluation",
     ],
     "Finance": [
         "financial large language model",
@@ -62,6 +71,34 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        "financial time series deep learning",
+        "robo-advisor",
+        "high-frequency trading machine learning",
+        "financial forecasting transformer",
+        "risk management deep learning",
+    ],
+}
+
+# Additional venue-targeted search terms for conferences with weaker API coverage
+VENUE_SEARCH_TERMS: Dict[str, List[str]] = {
+    "KDD": [
+        "knowledge discovery data mining agent",
+        "kdd fraud detection",
+        "kdd financial prediction",
+        "kdd graph neural network finance",
+        "kdd time series finance",
+    ],
+    "CVPR": [
+        "cvpr embodied agent",
+        "cvpr vision language agent",
+        "cvpr robotic planning",
+        "cvpr visual question answering benchmark",
+    ],
+    "AAAI": [
+        "aaai multi-agent reinforcement learning",
+        "aaai financial prediction",
+        "aaai autonomous agent planning",
+        "aaai benchmark evaluation",
     ],
 }
 
@@ -89,41 +126,54 @@ class SemanticScholarScraper:
         current_year = date.today().year
         year_range = f"{current_year - 1}-{current_year}"
 
+        # --- Topic-level searches (all target conferences) ---
         for topic, terms in TOPIC_SEARCH_TERMS.items():
             for term in terms:
+                self._search_and_collect(term, year_range, seen, label=f"{topic}/{term}")
+
+        # --- Venue-targeted searches (CVPR, KDD, AAAI specifically) ---
+        for venue, terms in VENUE_SEARCH_TERMS.items():
+            for term in terms:
+                self._search_and_collect(term, year_range, seen, label=f"[{venue}]/{term}")
+
+        logger.info("Semantic Scholar: %d unique papers collected", len(seen))
+        return list(seen.values())
+
+    def _search_and_collect(
+        self,
+        term: str,
+        year_range: str,
+        seen: Dict[str, "Paper"],
+        label: str = "",
+    ) -> None:
+        try:
+            results = self._search(term, year_range)
+            new_count = sum(
+                1 for p in results
+                if p.get_id() not in seen
+            )
+            for p in results:
+                pid = p.get_id()
+                if pid not in seen:
+                    seen[pid] = p
+            logger.debug("S2 [%s]: %d results (%d new)", label, len(results), new_count)
+        except requests.exceptions.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 429:
+                logger.warning("S2 rate limited; sleeping 30s then retrying [%s]", label)
+                time.sleep(30)
                 try:
                     results = self._search(term, year_range)
-                    new_count = 0
                     for p in results:
                         pid = p.get_id()
                         if pid not in seen:
                             seen[pid] = p
-                            new_count += 1
-                    logger.debug(
-                        "S2 [%s / %s]: %d results (%d new)",
-                        topic, term, len(results), new_count,
-                    )
-                except requests.exceptions.HTTPError as exc:
-                    if exc.response is not None and exc.response.status_code == 429:
-                        logger.warning("S2 rate limited; sleeping 30s then retrying")
-                        time.sleep(30)
-                        try:
-                            results = self._search(term, year_range)
-                            for p in results:
-                                pid = p.get_id()
-                                if pid not in seen:
-                                    seen[pid] = p
-                        except Exception as retry_exc:
-                            logger.error("S2 retry failed [%s / %s]: %s", topic, term, retry_exc)
-                    else:
-                        logger.error("S2 HTTP error [%s / %s]: %s", topic, term, exc)
-                except Exception as exc:
-                    logger.error("S2 error [%s / %s]: %s", topic, term, exc)
-                # Polite delay to stay within rate limits
-                time.sleep(self._delay)
-
-        logger.info("Semantic Scholar: %d unique papers collected", len(seen))
-        return list(seen.values())
+                except Exception as retry_exc:
+                    logger.error("S2 retry failed [%s]: %s", label, retry_exc)
+            else:
+                logger.error("S2 HTTP error [%s]: %s", label, exc)
+        except Exception as exc:
+            logger.error("S2 error [%s]: %s", label, exc)
+        time.sleep(self._delay)
 
     # ------------------------------------------------------------------
     # Internal helpers

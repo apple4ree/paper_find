@@ -93,20 +93,16 @@ class OpenReviewScraper:
                     for query in queries:
                         try:
                             batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
+                            new = 0
                             for p in batch:
                                 pid = p.get_id()
                                 if pid not in seen:
                                     seen[pid] = p
+                                    new += 1
                             if batch:
                                 logger.debug(
-                                    "OpenReview [%s %s / '%s']: %d",
-                                    conf_name, year or "?", query, len(batch),
+                                    "OpenReview [%s %s / '%s']: %d results (%d new)",
+                                    conf_name, year or "?", query, len(batch), new,
                                 )
                         except Exception as exc:
                             logger.warning(

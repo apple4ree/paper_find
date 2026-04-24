@@ -100,6 +100,23 @@ TOPICS = {
         "agent task",
         "agent environment",
         "agentic ai",
+        "task automation",
+        "workflow automation",
+        "robotic process automation",
+        "rpa",
+        "agent simulation",
+        "agent orchestration",
+        "ai assistant",
+        "conversational agent",
+        "software agent",
+        "agent learning",
+        "agent alignment",
+        "agent safety",
+        "agent communication",
+        "tool-integrated reasoning",
+        "chain-of-thought agent",
+        "retrieval-augmented agent",
+        "rag agent",
     ],
     "Harness": [
         "harness",
@@ -124,6 +141,24 @@ TOPICS = {
         "safety evaluation",
         "model assessment",
         "evaluation methodology",
+        "benchmark",
+        "leaderboard",
+        "test suite",
+        "held-out evaluation",
+        "zero-shot evaluation",
+        "few-shot evaluation",
+        "human evaluation",
+        "automatic evaluation",
+        "red-teaming",
+        "red teaming",
+        "robustness evaluation",
+        "alignment evaluation",
+        "bias evaluation",
+        "factuality evaluation",
+        "hallucination benchmark",
+        "reasoning benchmark",
+        "coding benchmark",
+        "math benchmark",
     ],
     "Finance": [
         "finance",
@@ -170,6 +205,30 @@ TOPICS = {
         "finllm",
         "economic forecasting",
         "sentiment analysis stock",
+        "equity",
+        "stock return",
+        "return prediction",
+        "factor model",
+        "financial forecasting",
+        "bankruptcy prediction",
+        "loan default",
+        "credit scoring",
+        "insurance",
+        "actuarial",
+        "payment",
+        "transaction",
+        "financial regulation",
+        "regtech",
+        "esg",
+        "sustainable finance",
+        "central bank",
+        "monetary policy",
+        "macroeconomic",
+        "financial time series",
+        "limit order",
+        "market impact",
+        "financial graph",
+        "knowledge graph finance",
     ],
 }
 
@@ -182,12 +241,17 @@ ARXIV_CATEGORIES = [
     "cs.CL",    # Computation and Language (NLP)
     "cs.CV",    # Computer Vision
     "cs.MA",    # Multi-Agent Systems
+    "cs.IR",    # Information Retrieval (evaluation/benchmark papers)
+    "cs.SE",    # Software Engineering (agent/harness papers)
     "q-fin.TR", # Trading and Market Microstructure
     "q-fin.PM", # Portfolio Management
     "q-fin.RM", # Risk Management
     "q-fin.ST", # Statistical Finance
     "q-fin.CP", # Computational Finance
+    "q-fin.GN", # General Finance
     "econ.GN",  # General Economics
+    "econ.EM",  # Econometrics
+    "stat.ML",  # Machine Learning (stat community)
 ]
 
 # Semantic Scholar fields to retrieve
