@@ -72,6 +72,11 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("SS_API_KEY", ""),
         help="Semantic Scholar API key (or set SS_API_KEY env var).",
     )
+    p.add_argument(
+        "--hf-token",
+        default=os.environ.get("HF_TOKEN", ""),
+        help="HuggingFace API token for authenticated access (or set HF_TOKEN env var).",
+    )
     return p.parse_args()
 
 
@@ -94,7 +99,7 @@ def main() -> int:
     if not args.skip_hf:
         logger.info("=== HuggingFace Papers ===")
         from src.scrapers.huggingface import HuggingFaceScraper
-        hf_papers = HuggingFaceScraper().fetch(target_date)
+        hf_papers = HuggingFaceScraper(hf_token=args.hf_token or None).fetch(target_date)
         logger.info("  collected %d papers", len(hf_papers))
         all_papers.extend(hf_papers)
         for p in hf_papers:

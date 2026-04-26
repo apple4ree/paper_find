@@ -75,6 +75,7 @@ jobs:
       - name: Run paper finder
         env:
           SS_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           SKIP_FLAGS=""
           if [ "${{ github.event.inputs.skip_arxiv }}" = "true" ]; then

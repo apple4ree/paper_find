@@ -9,10 +9,13 @@ Two fetch modes:
   2. Topic search        — https://huggingface.co/api/papers?q=<query>
      Searches the full HuggingFace paper database by keyword.
      Used to supplement the daily curated list with topic-relevant papers.
+
+Set HF_TOKEN environment variable for authenticated access (higher rate limits).
 """
 from __future__ import annotations
 
 import logging
+import os
 import time
 from datetime import date, timedelta
 from typing import List, Optional
@@ -27,22 +30,26 @@ logger = logging.getLogger(__name__)
 HF_DAILY_API = "https://huggingface.co/api/daily_papers"
 HF_SEARCH_API = "https://huggingface.co/api/papers"
 
-MAX_FALLBACK_DAYS = 3   # Try up to N previous days if today has no papers
-SEARCH_DELAY = 1.0       # Seconds between search requests
+MAX_FALLBACK_DAYS = 5   # Try up to N previous days if today has no papers
+SEARCH_DELAY = 1.5       # Seconds between search requests
 SEARCH_LIMIT = 50        # Papers per topic search query
 
 # Representative search terms per topic for the HuggingFace search API
 HF_TOPIC_QUERIES: dict[str, list[str]] = {
-    "Agent": ["llm agent", "autonomous agent", "multi-agent", "agentic"],
-    "Harness": ["evaluation harness", "lm eval", "llm benchmark"],
-    "Finance": ["financial llm", "stock prediction", "portfolio optimization", "algorithmic trading"],
+    "Agent": ["llm agent", "autonomous agent", "multi-agent", "agentic", "tool use"],
+    "Harness": ["evaluation harness", "lm eval", "llm benchmark", "evaluation framework"],
+    "Finance": ["financial llm", "stock prediction", "portfolio optimization", "algorithmic trading", "fintech"],
 }
 
 
 class HuggingFaceScraper:
-    def __init__(self, session: Optional[requests.Session] = None):
+    def __init__(self, session: Optional[requests.Session] = None, hf_token: Optional[str] = None):
         self.session = session or requests.Session()
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        token = hf_token or os.environ.get("HF_TOKEN", "")
+        if token:
+            self.session.headers["Authorization"] = f"Bearer {token}"
+            logger.info("HuggingFace: using authenticated access")
 
     def fetch(self, target_date: date) -> List[Paper]:
         """Return HuggingFace papers for *target_date*.

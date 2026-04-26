@@ -28,7 +28,8 @@ SS_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 _DELAY_NO_KEY = 1.5
 _DELAY_WITH_KEY = 0.5
 
-# Representative search terms per topic — broad enough to catch most papers
+# Representative search terms per topic — broad enough to catch most papers.
+# Includes conference-targeted terms for CVPR and KDD which are not on OpenReview.
 TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     "Agent": [
         "llm agent",
@@ -41,6 +42,14 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        # CVPR-affinity terms (embodied / visual agents)
+        "embodied agent",
+        "visual agent",
+        "robot learning agent",
+        "vision language agent",
+        # KDD-affinity terms
+        "knowledge graph agent",
+        "data mining agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +59,12 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        # CVPR-affinity
+        "vision benchmark",
+        "multimodal evaluation",
+        # KDD-affinity
+        "knowledge discovery benchmark",
+        "data mining evaluation",
     ],
     "Finance": [
         "financial large language model",
@@ -62,6 +77,13 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        # KDD-affinity (KDD has strong finance track)
+        "financial graph neural network",
+        "anti-money laundering",
+        "risk assessment machine learning",
+        "stock ranking",
+        "financial time series",
+        "transaction fraud",
     ],
 }
 
