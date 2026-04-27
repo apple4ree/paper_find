@@ -64,27 +64,60 @@ class PaperProcessor:
 # ---------------------------------------------------------------------------
 
 def _deduplicate(papers: List[Paper]) -> List[Paper]:
-    """Merge duplicates, keeping the richest metadata."""
+    """Merge duplicates, keeping the richest metadata.
+
+    Two-pass dedup:
+      1. Primary key: arxiv:<id> or title:<normalized>
+      2. Secondary: cross-link arxiv-keyed and title-keyed entries for the
+         same paper (one source had the arXiv ID, another didn't).
+    """
+    # Pass 1: primary key dedup
     seen: Dict[str, Paper] = {}
     for p in papers:
         pid = p.get_id()
         if pid not in seen:
             seen[pid] = p
         else:
-            existing = seen[pid]
-            # Enrich existing record rather than replacing it
-            if p.conference and not existing.conference:
-                existing.conference = p.conference
-            if p.abstract and not existing.abstract:
-                existing.abstract = p.abstract
-            if p.year and not existing.year:
-                existing.year = p.year
-            if p.published_date and not existing.published_date:
-                existing.published_date = p.published_date
-            # Prefer higher-priority source when merging duplicates
-            if _SOURCE_PRIORITY.get(p.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
-                existing.source = p.source
+            _merge(seen[pid], p)
+
+    # Pass 2: cross-link arxiv-keyed entries with title-keyed duplicates.
+    # Build a title → arxiv-key map for O(n) lookup.
+    title_to_arxiv_key: Dict[str, str] = {}
+    for pid, p in seen.items():
+        if pid.startswith("arxiv:"):
+            norm = " ".join(p.title.lower().split())
+            title_to_arxiv_key[norm] = pid
+
+    to_remove: List[str] = []
+    for pid, p in seen.items():
+        if pid.startswith("title:"):
+            norm = pid[len("title:"):]
+            arxiv_key = title_to_arxiv_key.get(norm)
+            if arxiv_key:
+                _merge(seen[arxiv_key], p)
+                to_remove.append(pid)
+
+    for pid in to_remove:
+        del seen[pid]
+
     return list(seen.values())
+
+
+def _merge(target: Paper, source: Paper) -> None:
+    """Enrich *target* with metadata from *source* in-place."""
+    if source.conference and not target.conference:
+        target.conference = source.conference
+    if source.abstract and not target.abstract:
+        target.abstract = source.abstract
+    if source.year and not target.year:
+        target.year = source.year
+    if source.published_date and not target.published_date:
+        target.published_date = source.published_date
+    if source.arxiv_id and not target.arxiv_id:
+        target.arxiv_id = source.arxiv_id
+        target.url = f"https://arxiv.org/abs/{source.arxiv_id}"
+    if _SOURCE_PRIORITY.get(source.source, 99) < _SOURCE_PRIORITY.get(target.source, 99):
+        target.source = source.source
 
 
 def _detect_conference(paper: Paper) -> Optional[str]:

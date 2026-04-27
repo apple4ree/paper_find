@@ -41,6 +41,8 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        "embodied agent",
+        "planning agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +52,8 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        "model evaluation benchmark",
+        "safety evaluation",
     ],
     "Finance": [
         "financial large language model",
@@ -62,7 +66,14 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        "financial forecasting neural",
+        "risk management machine learning",
     ],
+}
+
+# Preferred venues to prioritize — used to boost ranking in output
+PRIORITY_VENUES = {
+    "AAAI", "NeurIPS", "ICML", "ICLR", "CVPR", "KDD",
 }
 
 

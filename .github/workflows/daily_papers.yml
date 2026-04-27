@@ -32,6 +32,12 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      skip_hf:
+        description: "Skip HuggingFace scraper"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 jobs:
   digest:
@@ -75,6 +81,7 @@ jobs:
       - name: Run paper finder
         env:
           SS_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           SKIP_FLAGS=""
           if [ "${{ github.event.inputs.skip_arxiv }}" = "true" ]; then
@@ -85,6 +92,9 @@ jobs:
           fi
           if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
             SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
+          fi
+          if [ "${{ github.event.inputs.skip_hf }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-hf"
           fi
           python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
 

@@ -5,6 +5,9 @@ Uses the OpenReview API v2 to search for accepted papers by topic keyword.
 Covers the current and previous year for each hosted venue.
 
 API base: https://api2.openreview.net
+Endpoints used:
+  - /notes/search  (keyword search within a venue)
+  - /notes         (list accepted papers by venue tag, as fallback)
 """
 from __future__ import annotations
 
@@ -21,14 +24,12 @@ from ..models import Paper
 logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
-_DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
-_LIMIT = 25     # results per search call
+_DELAY = 1.5
+_LIMIT = 25
+_LIST_LIMIT = 50   # per-request limit when listing by venue tag
 
 _CUR_YEAR = date.today().year
 
-# Map canonical conference name → list of OpenReview venue IDs to query.
-# We try current year and previous year so that freshly-accepted papers
-# (e.g. ICLR 2026 camera-ready) are captured alongside 2025 proceedings.
 VENUE_CONF: Dict[str, List[str]] = {
     "ICLR": [
         f"ICLR.cc/{_CUR_YEAR}/Conference",
@@ -44,7 +45,6 @@ VENUE_CONF: Dict[str, List[str]] = {
     ],
 }
 
-# Representative search terms per topic
 TOPIC_QUERIES: Dict[str, List[str]] = {
     "Agent": [
         "llm agent",
@@ -69,6 +69,12 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
     ],
 }
 
+# Decision tags that indicate an accepted paper
+_ACCEPT_TAGS = frozenset([
+    "accept", "accepted", "oral", "spotlight", "poster",
+    "workshop", "notable", "award",
+])
+
 _ARXIV_ID_RE = re.compile(r"arxiv\.org/(?:abs|pdf)/(\d{4}\.\d{4,5})")
 _YEAR_RE = re.compile(r"/(\d{4})/")
 
@@ -81,7 +87,6 @@ class OpenReviewScraper:
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
 
     def fetch(self) -> List[Paper]:
-        """Return ICLR/NeurIPS/ICML papers matching Agent/Harness/Finance keywords."""
         seen: Dict[str, Paper] = {}
 
         for conf_name, venue_ids in VENUE_CONF.items():
@@ -89,16 +94,11 @@ class OpenReviewScraper:
                 year_m = _YEAR_RE.search(venue_id)
                 year = int(year_m.group(1)) if year_m else None
 
+                # Method 1: keyword search
                 for topic, queries in TOPIC_QUERIES.items():
                     for query in queries:
                         try:
                             batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
                             for p in batch:
                                 pid = p.get_id()
                                 if pid not in seen:
@@ -108,6 +108,18 @@ class OpenReviewScraper:
                                     "OpenReview [%s %s / '%s']: %d",
                                     conf_name, year or "?", query, len(batch),
                                 )
+                        except requests.exceptions.HTTPError as exc:
+                            code = exc.response.status_code if exc.response else 0
+                            if code == 404:
+                                logger.debug(
+                                    "OpenReview [%s %s]: venue not found, skipping",
+                                    conf_name, year,
+                                )
+                                break  # no point trying other queries for this venue
+                            logger.warning(
+                                "OpenReview [%s %s / '%s']: %s",
+                                conf_name, year or "?", query, exc,
+                            )
                         except Exception as exc:
                             logger.warning(
                                 "OpenReview [%s %s / '%s']: %s",
@@ -153,10 +165,6 @@ class OpenReviewScraper:
 # ---------------------------------------------------------------------------
 
 def _field(content: dict, key: str) -> str:
-    """Extract string value from an OpenReview v2 content dict.
-
-    Field values may be plain strings or wrapped as {"value": "..."}.
-    """
     v = content.get(key, "")
     if isinstance(v, dict):
         return str(v.get("value") or "")
@@ -172,13 +180,11 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
 
     abstract = _field(content, "abstract").strip()
 
-    # Authors: plain list or {"value": [...]}
     raw_authors = content.get("authors") or []
     if isinstance(raw_authors, dict):
         raw_authors = raw_authors.get("value") or []
     authors = [str(a) for a in raw_authors if a]
 
-    # arXiv ID: check known fields and any URL-shaped value
     arxiv_id: Optional[str] = None
     for key in ("ARXIV", "arxiv", "_bibtex", "pdf", "code"):
         m = _ARXIV_ID_RE.search(_field(content, key))
@@ -191,7 +197,6 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
     if arxiv_id:
         url = f"https://arxiv.org/abs/{arxiv_id}"
 
-    # Creation timestamp is in milliseconds
     pub_date: Optional[date] = None
     for ts_key in ("cdate", "odate", "mdate"):
         cdate = item.get(ts_key)

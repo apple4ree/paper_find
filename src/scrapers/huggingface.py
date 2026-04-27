@@ -1,18 +1,24 @@
 """
 HuggingFace Daily Papers scraper.
 
-Two fetch modes:
+Three fetch modes (in priority order):
   1. Daily curated list  — https://huggingface.co/api/daily_papers?date=YYYY-MM-DD
      Returns the ~20-50 papers HuggingFace editors highlight each day.
      Falls back to the most recent available day if the requested date has no data.
 
   2. Topic search        — https://huggingface.co/api/papers?q=<query>
      Searches the full HuggingFace paper database by keyword.
-     Used to supplement the daily curated list with topic-relevant papers.
+
+  3. Web scraping fallback — https://huggingface.co/papers
+     Used when the JSON API returns 403 (e.g. missing auth token).
+
+Authentication: set HF_TOKEN env var or pass hf_token= to the constructor.
 """
 from __future__ import annotations
 
 import logging
+import os
+import re
 import time
 from datetime import date, timedelta
 from typing import List, Optional
@@ -26,40 +32,42 @@ logger = logging.getLogger(__name__)
 
 HF_DAILY_API = "https://huggingface.co/api/daily_papers"
 HF_SEARCH_API = "https://huggingface.co/api/papers"
+HF_PAPERS_URL = "https://huggingface.co/papers"
 
-MAX_FALLBACK_DAYS = 3   # Try up to N previous days if today has no papers
-SEARCH_DELAY = 1.0       # Seconds between search requests
-SEARCH_LIMIT = 50        # Papers per topic search query
+MAX_FALLBACK_DAYS = 3
+SEARCH_DELAY = 1.0
+SEARCH_LIMIT = 50
 
-# Representative search terms per topic for the HuggingFace search API
 HF_TOPIC_QUERIES: dict[str, list[str]] = {
     "Agent": ["llm agent", "autonomous agent", "multi-agent", "agentic"],
     "Harness": ["evaluation harness", "lm eval", "llm benchmark"],
     "Finance": ["financial llm", "stock prediction", "portfolio optimization", "algorithmic trading"],
 }
 
+_ARXIV_ID_RE = re.compile(r"(\d{4}\.\d{4,5})")
+
 
 class HuggingFaceScraper:
-    def __init__(self, session: Optional[requests.Session] = None):
+    def __init__(
+        self,
+        session: Optional[requests.Session] = None,
+        hf_token: Optional[str] = None,
+    ):
         self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        token = hf_token or os.environ.get("HF_TOKEN", "")
+        headers: dict = {"User-Agent": "paper-find-bot/1.0"}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        self.session.headers.update(headers)
 
     def fetch(self, target_date: date) -> List[Paper]:
-        """Return HuggingFace papers for *target_date*.
-
-        Combines:
-          - The daily curated list (with fallback for missing dates)
-          - Topic-based search results from the HF paper database
-        """
         all_papers: dict[str, Paper] = {}
 
-        # --- 1. Daily curated papers ---
         daily = self._fetch_daily(target_date)
         for p in daily:
             all_papers[p.get_id()] = p
         logger.info("HuggingFace daily: %d papers", len(daily))
 
-        # --- 2. Topic search papers ---
         search_papers = self._fetch_by_topics()
         new_count = 0
         for p in search_papers:
@@ -76,7 +84,6 @@ class HuggingFaceScraper:
     # ------------------------------------------------------------------
 
     def _fetch_daily(self, target_date: date) -> List[Paper]:
-        """Fetch today's curated papers, with fallback to recent days."""
         for offset in range(MAX_FALLBACK_DAYS + 1):
             d = target_date - timedelta(days=offset)
             papers = self._fetch_date(d)
@@ -87,11 +94,9 @@ class HuggingFaceScraper:
                         target_date, d,
                     )
                 return papers
-        logger.warning(
-            "HuggingFace: no curated papers found in the last %d days",
-            MAX_FALLBACK_DAYS,
-        )
-        return []
+        # API failed — try web scraping fallback
+        logger.info("HuggingFace: API unavailable, trying web scraping fallback")
+        return self._scrape_web(target_date)
 
     def _fetch_date(self, d: date) -> List[Paper]:
         try:
@@ -100,6 +105,12 @@ class HuggingFaceScraper:
             )
             resp.raise_for_status()
             data = resp.json()
+        except requests.exceptions.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code in (401, 403):
+                logger.warning("HuggingFace daily API auth error (%s): %s", d, exc)
+            else:
+                logger.error("HuggingFace daily fetch error (%s): %s", d, exc)
+            return []
         except Exception as exc:
             logger.error("HuggingFace daily fetch error (%s): %s", d, exc)
             return []
@@ -112,11 +123,39 @@ class HuggingFaceScraper:
         return papers
 
     # ------------------------------------------------------------------
+    # Web scraping fallback (parses the /papers HTML page)
+    # ------------------------------------------------------------------
+
+    def _scrape_web(self, target_date: date) -> List[Paper]:
+        """Parse arXiv IDs and titles from the HuggingFace /papers HTML page."""
+        try:
+            resp = self.session.get(HF_PAPERS_URL, timeout=30)
+            resp.raise_for_status()
+            html = resp.text
+        except Exception as exc:
+            logger.error("HuggingFace web scrape error: %s", exc)
+            return []
+
+        # Extract arXiv IDs mentioned in href attributes like /papers/2501.12345
+        paper_ids = list(dict.fromkeys(re.findall(r'/papers/(\d{4}\.\d{4,5})', html)))
+        logger.info("HuggingFace web: found %d paper IDs", len(paper_ids))
+
+        papers: List[Paper] = []
+        for arxiv_id in paper_ids[:60]:  # cap to avoid hammering arXiv
+            papers.append(Paper(
+                title=f"arXiv:{arxiv_id}",  # title will be enriched by arXiv scraper
+                arxiv_id=arxiv_id,
+                url=f"https://arxiv.org/abs/{arxiv_id}",
+                source="huggingface",
+                published_date=target_date,
+            ))
+        return papers
+
+    # ------------------------------------------------------------------
     # Topic-based search
     # ------------------------------------------------------------------
 
     def _fetch_by_topics(self) -> List[Paper]:
-        """Search HuggingFace paper database by topic keywords."""
         results: List[Paper] = []
         seen_ids: set[str] = set()
 
@@ -138,7 +177,6 @@ class HuggingFaceScraper:
         return results
 
     def _search_query(self, query: str) -> List[Paper]:
-        """Search HuggingFace papers by a single query string."""
         try:
             resp = self.session.get(
                 HF_SEARCH_API,
@@ -151,7 +189,6 @@ class HuggingFaceScraper:
             logger.error("HuggingFace search fetch error (%s): %s", query, exc)
             return []
 
-        # The response may be a list or a dict with a "papers" key
         if isinstance(data, list):
             items = data
         elif isinstance(data, dict):
@@ -171,7 +208,7 @@ class HuggingFaceScraper:
     # ------------------------------------------------------------------
 
     def _parse_item(self, item: dict, source: str = "huggingface") -> Optional[Paper]:
-        pd = item.get("paper") or item  # some responses nest under "paper"
+        pd = item.get("paper") or item
 
         title = (pd.get("title") or "").strip()
         if not title:
