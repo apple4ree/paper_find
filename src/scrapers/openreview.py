@@ -21,8 +21,15 @@ from ..models import Paper
 logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
-_DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
+_DELAY = 2.0    # seconds between requests
 _LIMIT = 25     # results per search call
+_RETRY_WAITS = [5, 15, 30]  # seconds to wait on retries
+
+_BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/124.0.0.0 Safari/537.36"
+)
 
 _CUR_YEAR = date.today().year
 
@@ -78,7 +85,7 @@ class OpenReviewScraper:
 
     def __init__(self, session: Optional[requests.Session] = None):
         self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        self.session.headers.update({"User-Agent": _BROWSER_UA})
 
     def fetch(self) -> List[Paper]:
         """Return ICLR/NeurIPS/ICML papers matching Agent/Harness/Finance keywords."""
@@ -93,12 +100,6 @@ class OpenReviewScraper:
                     for query in queries:
                         try:
                             batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
                             for p in batch:
                                 pid = p.get_id()
                                 if pid not in seen:
@@ -120,6 +121,28 @@ class OpenReviewScraper:
 
     # ------------------------------------------------------------------
 
+    def _request_with_retry(self, url: str, params: dict) -> Optional[dict]:
+        """GET with retry on 429 / 5xx."""
+        for attempt, wait in enumerate([0] + _RETRY_WAITS):
+            if wait:
+                logger.debug("OpenReview retry %d, sleeping %ds", attempt, wait)
+                time.sleep(wait)
+            try:
+                resp = self.session.get(url, params=params, timeout=30)
+                if resp.status_code == 429:
+                    logger.warning("OpenReview rate-limited (attempt %d)", attempt + 1)
+                    continue
+                resp.raise_for_status()
+                return resp.json()
+            except requests.exceptions.HTTPError:
+                raise
+            except requests.exceptions.RequestException as exc:
+                if attempt < len(_RETRY_WAITS):
+                    logger.warning("OpenReview request error (attempt %d): %s", attempt + 1, exc)
+                    continue
+                raise
+        return None
+
     def _search(
         self,
         query: str,
@@ -127,7 +150,8 @@ class OpenReviewScraper:
         conf_name: str,
         year: Optional[int],
     ) -> List[Paper]:
-        resp = self.session.get(
+        # Try full-text search first
+        data = self._request_with_retry(
             f"{_API}/notes/search",
             params={
                 "term": query,
@@ -135,13 +159,23 @@ class OpenReviewScraper:
                 "offset": 0,
                 "limit": _LIMIT,
             },
-            timeout=30,
         )
-        resp.raise_for_status()
-        data = resp.json()
+        notes = (data or {}).get("notes") or []
+
+        # Fallback: if search returns nothing, list notes for the venue directly
+        if not notes:
+            data = self._request_with_retry(
+                f"{_API}/notes",
+                params={
+                    "content.venueid": venue_id,
+                    "offset": 0,
+                    "limit": _LIMIT,
+                },
+            )
+            notes = (data or {}).get("notes") or []
 
         papers: List[Paper] = []
-        for item in data.get("notes") or []:
+        for item in notes:
             p = _parse_note(item, conf_name, year)
             if p:
                 papers.append(p)

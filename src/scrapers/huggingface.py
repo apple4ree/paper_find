@@ -9,10 +9,15 @@ Two fetch modes:
   2. Topic search        — https://huggingface.co/api/papers?q=<query>
      Searches the full HuggingFace paper database by keyword.
      Used to supplement the daily curated list with topic-relevant papers.
+
+Authentication:
+  Set HF_TOKEN environment variable with a HuggingFace API token for
+  authenticated access (avoids rate-limiting / IP-blocking issues).
 """
 from __future__ import annotations
 
 import logging
+import os
 import time
 from datetime import date, timedelta
 from typing import List, Optional
@@ -28,8 +33,14 @@ HF_DAILY_API = "https://huggingface.co/api/daily_papers"
 HF_SEARCH_API = "https://huggingface.co/api/papers"
 
 MAX_FALLBACK_DAYS = 3   # Try up to N previous days if today has no papers
-SEARCH_DELAY = 1.0       # Seconds between search requests
+SEARCH_DELAY = 1.5       # Seconds between search requests
 SEARCH_LIMIT = 50        # Papers per topic search query
+
+_BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/124.0.0.0 Safari/537.36"
+)
 
 # Representative search terms per topic for the HuggingFace search API
 HF_TOPIC_QUERIES: dict[str, list[str]] = {
@@ -40,9 +51,17 @@ HF_TOPIC_QUERIES: dict[str, list[str]] = {
 
 
 class HuggingFaceScraper:
-    def __init__(self, session: Optional[requests.Session] = None):
+    def __init__(
+        self,
+        session: Optional[requests.Session] = None,
+        hf_token: Optional[str] = None,
+    ):
         self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        token = hf_token or os.environ.get("HF_TOKEN", "")
+        headers: dict = {"User-Agent": _BROWSER_UA}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        self.session.headers.update(headers)
 
     def fetch(self, target_date: date) -> List[Paper]:
         """Return HuggingFace papers for *target_date*.
@@ -94,14 +113,26 @@ class HuggingFaceScraper:
         return []
 
     def _fetch_date(self, d: date) -> List[Paper]:
-        try:
-            resp = self.session.get(
-                HF_DAILY_API, params={"date": str(d)}, timeout=30
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as exc:
-            logger.error("HuggingFace daily fetch error (%s): %s", d, exc)
+        for attempt, wait in enumerate([0, 5, 15]):
+            if wait:
+                time.sleep(wait)
+            try:
+                resp = self.session.get(
+                    HF_DAILY_API, params={"date": str(d)}, timeout=30
+                )
+                if resp.status_code == 429:
+                    logger.warning("HuggingFace rate-limited; retrying in %ds", wait or 5)
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                break
+            except requests.exceptions.HTTPError as exc:
+                logger.error("HuggingFace daily fetch error (%s): %s", d, exc)
+                return []
+            except Exception as exc:
+                logger.error("HuggingFace daily fetch error (%s): %s", d, exc)
+                return []
+        else:
             return []
 
         papers: List[Paper] = []
@@ -139,16 +170,28 @@ class HuggingFaceScraper:
 
     def _search_query(self, query: str) -> List[Paper]:
         """Search HuggingFace papers by a single query string."""
-        try:
-            resp = self.session.get(
-                HF_SEARCH_API,
-                params={"q": query, "limit": SEARCH_LIMIT},
-                timeout=30,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as exc:
-            logger.error("HuggingFace search fetch error (%s): %s", query, exc)
+        for attempt, wait in enumerate([0, 5, 15]):
+            if wait:
+                time.sleep(wait)
+            try:
+                resp = self.session.get(
+                    HF_SEARCH_API,
+                    params={"q": query, "limit": SEARCH_LIMIT},
+                    timeout=30,
+                )
+                if resp.status_code == 429:
+                    logger.warning("HuggingFace search rate-limited; retrying in %ds", wait or 5)
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                break
+            except requests.exceptions.HTTPError as exc:
+                logger.error("HuggingFace search fetch error (%s): %s", query, exc)
+                return []
+            except Exception as exc:
+                logger.error("HuggingFace search fetch error (%s): %s", query, exc)
+                return []
+        else:
             return []
 
         # The response may be a list or a dict with a "papers" key

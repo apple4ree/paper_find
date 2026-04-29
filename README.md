@@ -52,11 +52,14 @@ python main.py --skip-arxiv
 
 # Semantic Scholar API 키 사용 (요청 한도 확대)
 SS_API_KEY=<your_key> python main.py
+
+# HuggingFace 토큰 사용 (차단 방지)
+HF_TOKEN=<your_token> python main.py
 ```
 
 ## 자동 스케줄 (GitHub Actions)
 
-`.github/workflows/daily_papers.yml`이 매일 **UTC 06:00 (KST 15:00)** 에 자동 실행되어 결과를 커밋합니다.
+`.github/workflows/daily_papers.yml`이 매일 **UTC 09:00 (KST 18:00)** 에 자동 실행되어 결과를 커밋합니다.
 
 수동 실행은 Actions 탭 → **Daily Paper Digest** → **Run workflow** 에서 가능합니다.
 
@@ -65,6 +68,7 @@ SS_API_KEY=<your_key> python main.py
 | Secret | 설명 |
 |--------|------|
 | `SEMANTIC_SCHOLAR_API_KEY` | S2 API 키 (없어도 동작, 있으면 요청 한도 증가) |
+| `HF_TOKEN` | HuggingFace API 토큰 (IP 차단 시 인증으로 우회, [발급](https://huggingface.co/settings/tokens)) |
 
 ## 프로젝트 구조
 
@@ -80,6 +84,7 @@ paper_find/
 │   └── scrapers/
 │       ├── huggingface.py     # HuggingFace Daily Papers API
 │       ├── semantic_scholar.py# Semantic Scholar 학회 논문
+│       ├── openreview.py      # OpenReview (ICLR/NeurIPS/ICML)
 │       └── arxiv.py           # arXiv 일별 제출 논문
 ├── output/
 │   ├── latest.md              # 최신 결과

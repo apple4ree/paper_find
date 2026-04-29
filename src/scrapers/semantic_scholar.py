@@ -24,6 +24,12 @@ logger = logging.getLogger(__name__)
 
 SS_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 
+_BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/124.0.0.0 Safari/537.36"
+)
+
 # Delay between S2 requests (seconds): 1.5s without key, 0.5s with key
 _DELAY_NO_KEY = 1.5
 _DELAY_WITH_KEY = 0.5
@@ -41,6 +47,8 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        "embodied agent",
+        "vision language agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +58,8 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        "safety benchmark",
+        "model assessment",
     ],
     "Finance": [
         "financial large language model",
@@ -62,6 +72,8 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        "financial forecasting",
+        "risk assessment neural",
     ],
 }
 
@@ -73,10 +85,11 @@ class SemanticScholarScraper:
         session: Optional[requests.Session] = None,
     ):
         self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
-        self._has_key = bool(api_key)
+        headers: dict = {"User-Agent": _BROWSER_UA}
         if api_key:
-            self.session.headers["x-api-key"] = api_key
+            headers["x-api-key"] = api_key
+        self.session.headers.update(headers)
+        self._has_key = bool(api_key)
         self._delay = _DELAY_WITH_KEY if self._has_key else _DELAY_NO_KEY
 
     # ------------------------------------------------------------------
@@ -136,9 +149,16 @@ class SemanticScholarScraper:
             "limit": limit,
             "year": year_range,
         }
-        resp = self.session.get(SS_SEARCH_URL, params=params, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
+        for attempt, wait in enumerate([0, 5, 15, 30]):
+            if wait:
+                time.sleep(wait)
+            resp = self.session.get(SS_SEARCH_URL, params=params, timeout=30)
+            if resp.status_code == 429:
+                logger.warning("S2 rate-limited (attempt %d); retrying in %ds", attempt + 1, wait or 5)
+                continue
+            resp.raise_for_status()
+            data = resp.json()
+            break
 
         papers: List[Paper] = []
         for item in data.get("data") or []:

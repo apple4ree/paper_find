@@ -22,7 +22,13 @@ from ..models import Paper
 
 logger = logging.getLogger(__name__)
 
-ARXIV_API = "http://export.arxiv.org/api/query"
+ARXIV_API = "https://export.arxiv.org/api/query"
+
+_BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/124.0.0.0 Safari/537.36"
+)
 NS = {
     "atom": "http://www.w3.org/2005/Atom",
     "arxiv": "http://arxiv.org/schemas/atom",
@@ -90,7 +96,7 @@ def _arxiv_date_range(target_date: date) -> Tuple[date, date]:
 class ArxivScraper:
     def __init__(self, session: Optional[requests.Session] = None):
         self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        self.session.headers.update({"User-Agent": _BROWSER_UA})
 
     def fetch(self, target_date: date) -> List[Paper]:
         """Return arXiv papers submitted around *target_date* that match topics."""
@@ -153,9 +159,16 @@ class ArxivScraper:
             "sortBy": "submittedDate",
             "sortOrder": "descending",
         }
-        resp = self.session.get(ARXIV_API, params=params, timeout=60)
-        resp.raise_for_status()
-        return _parse_arxiv_xml(resp.text)
+        for attempt, wait in enumerate([0, 10, 30]):
+            if wait:
+                time.sleep(wait)
+            resp = self.session.get(ARXIV_API, params=params, timeout=60)
+            if resp.status_code == 429:
+                logger.warning("arXiv rate-limited (attempt %d)", attempt + 1)
+                continue
+            resp.raise_for_status()
+            return _parse_arxiv_xml(resp.text)
+        return []
 
 
 # ---------------------------------------------------------------------------
