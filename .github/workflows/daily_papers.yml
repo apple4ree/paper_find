@@ -2,12 +2,10 @@ name: Daily Paper Digest
 
 on:
   # Every day at 09:00 UTC (= 18:00 KST)
-  # HuggingFace publishes its daily paper list around 08:00 UTC,
-  # so 09:00 UTC ensures we always capture today's curated papers.
+  # HuggingFace publishes its daily paper list around 08:00 UTC
   schedule:
     - cron: "0 9 * * *"
 
-  # Allow manual trigger with optional overrides
   workflow_dispatch:
     inputs:
       date:
@@ -32,12 +30,18 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      skip_hf:
+        description: "Skip HuggingFace scraper"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 jobs:
   digest:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to push the report back to the repo
+      contents: write
 
     steps:
       # ------------------------------------------------------------------ #
@@ -73,20 +77,21 @@ jobs:
           fi
 
       - name: Run paper finder
+        id: finder
         env:
-          SS_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          SS_API_KEY:         ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          HF_TOKEN:           ${{ secrets.HF_TOKEN }}
+          OPENREVIEW_USER:    ${{ secrets.OPENREVIEW_USER }}
+          OPENREVIEW_PASS:    ${{ secrets.OPENREVIEW_PASS }}
         run: |
           SKIP_FLAGS=""
-          if [ "${{ github.event.inputs.skip_arxiv }}" = "true" ]; then
-            SKIP_FLAGS="$SKIP_FLAGS --skip-arxiv"
-          fi
-          if [ "${{ github.event.inputs.skip_s2 }}" = "true" ]; then
-            SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
-          fi
-          if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
-            SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
-          fi
-          python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
+          [ "${{ github.event.inputs.skip_arxiv }}"      = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-arxiv"
+          [ "${{ github.event.inputs.skip_s2 }}"         = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
+          [ "${{ github.event.inputs.skip_openreview }}" = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
+          [ "${{ github.event.inputs.skip_hf }}"         = "true" ] && SKIP_FLAGS="$SKIP_FLAGS --skip-hf"
+
+          python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS | tee /tmp/digest_summary.txt
+          echo "summary_file=/tmp/digest_summary.txt" >> "$GITHUB_OUTPUT"
 
       # ------------------------------------------------------------------ #
       # 4. Commit & push the report
@@ -99,3 +104,15 @@ jobs:
           git diff --staged --quiet || \
             git commit -m "digest: daily paper report ${{ steps.date.outputs.value }}"
           git push
+
+      # ------------------------------------------------------------------ #
+      # 5. Print summary as job summary
+      # ------------------------------------------------------------------ #
+      - name: Write job summary
+        if: always()
+        run: |
+          echo "## Paper Digest — ${{ steps.date.outputs.value }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/digest_summary.txt 2>/dev/null || echo "(no output)"
+          cat /tmp/digest_summary.txt 2>/dev/null >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

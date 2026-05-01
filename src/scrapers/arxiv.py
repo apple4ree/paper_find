@@ -5,6 +5,10 @@ Fetches papers submitted in the last LOOKBACK_DAYS from relevant categories
 and filters by topic keywords.  Uses submittedDate range queries for
 precise daily targeting, with weekend/holiday fallback logic.
 
+AAAI, CVPR, KDD and other non-OpenReview conferences are covered here because
+their accepted papers almost always have an arXiv preprint with the conference
+name mentioned in the abstract or comments.
+
 API endpoint: http://export.arxiv.org/api/query  (Atom/XML)
 """
 from __future__ import annotations
@@ -24,17 +28,14 @@ logger = logging.getLogger(__name__)
 
 ARXIV_API = "http://export.arxiv.org/api/query"
 NS = {
-    "atom": "http://www.w3.org/2005/Atom",
+    "atom":  "http://www.w3.org/2005/Atom",
     "arxiv": "http://arxiv.org/schemas/atom",
 }
 
-# ArXiv API recommends 3-second delay between requests
-ARXIV_DELAY = 3.0
+ARXIV_DELAY           = 3.0   # arXiv API recommends 3-second delay
+MAX_RESULTS_PER_QUERY = 300   # arXiv hard cap is 2000; 300 is safe and fast
 
-# Max results per query (arXiv API hard cap is 2000; we use 300 for safety)
-MAX_RESULTS_PER_QUERY = 300
-
-# Top keywords to search per topic (keep each concise for URL length)
+# Search terms per topic
 TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     "Agent": [
         "agent",
@@ -61,26 +62,34 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     ],
 }
 
-# ArXiv categories grouped by topic affinity
+# ArXiv categories grouped by topic
 TOPIC_CATEGORIES: Dict[str, List[str]] = {
-    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
+    "Agent":   ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
     "Harness": ["cs.AI", "cs.LG", "cs.CL"],
     "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP"],
 }
 
+# Extra conference-specific queries to catch AAAI, CVPR, KDD papers
+# that mention the venue in title/abstract/comments but may not be in
+# standard venue fields.
+CONFERENCE_EXTRA_QUERIES: Dict[str, Tuple[str, List[str]]] = {
+    # (keyword, [categories])
+    "aaai":  ("AAAI",  ["cs.AI", "cs.LG", "cs.CL"]),
+    "cvpr":  ("CVPR",  ["cs.CV", "cs.LG", "cs.AI"]),
+    "kdd":   ("KDD",   ["cs.LG", "cs.AI", "cs.SI"]),
+    "iclr":  ("ICLR",  ["cs.LG", "cs.AI", "cs.CL"]),
+    "icml":  ("ICML",  ["cs.LG", "cs.AI", "cs.CL"]),
+    "neurips": ("NeurIPS", ["cs.LG", "cs.AI", "cs.CL", "cs.CV"]),
+}
+
 
 def _arxiv_date_range(target_date: date) -> Tuple[date, date]:
-    """Return (start, end) dates for arXiv query, accounting for weekends.
-
-    arXiv does not accept new submissions on Saturday/Sunday, so on Mondays
-    we look back to include the previous Friday's batch.
-    """
     weekday = target_date.weekday()  # 0=Mon … 6=Sun
-    if weekday == 6:  # Sunday → look at Friday
+    if weekday == 6:    # Sunday → Friday
         start = target_date - timedelta(days=2)
-    elif weekday == 5:  # Saturday → look at Friday
+    elif weekday == 5:  # Saturday → Friday
         start = target_date - timedelta(days=1)
-    elif weekday == 0:  # Monday → include Fri/Sat/Sun too
+    elif weekday == 0:  # Monday → include Fri/Sat/Sun
         start = target_date - timedelta(days=3)
     else:
         start = target_date - timedelta(days=LOOKBACK_DAYS)
@@ -93,36 +102,45 @@ class ArxivScraper:
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
 
     def fetch(self, target_date: date) -> List[Paper]:
-        """Return arXiv papers submitted around *target_date* that match topics."""
         start_date, end_date = _arxiv_date_range(target_date)
-        logger.info(
-            "ArXiv: querying submissions from %s to %s", start_date, end_date
-        )
+        logger.info("ArXiv: querying submissions from %s to %s", start_date, end_date)
 
         seen: Dict[str, Paper] = {}
 
+        # --- Topic + category queries ---
         for topic, terms in TOPIC_SEARCH_TERMS.items():
             categories = TOPIC_CATEGORIES[topic]
             for term in terms:
                 for cat in categories:
                     try:
-                        results = self._search(
-                            term, cat, start_date, end_date,
-                            max_results=MAX_RESULTS_PER_QUERY,
-                        )
+                        results = self._search(term, cat, start_date, end_date)
                         for p in results:
                             pid = p.get_id()
                             if pid not in seen:
                                 seen[pid] = p
-                        logger.debug(
-                            "ArXiv [%s/%s/%s]: %d results", topic, term, cat, len(results)
-                        )
+                        logger.debug("ArXiv [%s/%s/%s]: %d", topic, term, cat, len(results))
                     except Exception as exc:
-                        logger.error(
-                            "ArXiv error [%s / %s / %s]: %s", topic, term, cat, exc
-                        )
-                    # Respect arXiv's recommended 3-second delay
+                        logger.error("ArXiv error [%s/%s/%s]: %s", topic, term, cat, exc)
                     time.sleep(ARXIV_DELAY)
+
+        # --- Conference-specific queries to find AAAI/CVPR/KDD/etc. papers ---
+        for keyword, (conf_name, cats) in CONFERENCE_EXTRA_QUERIES.items():
+            for cat in cats:
+                try:
+                    results = self._search(keyword, cat, start_date, end_date)
+                    for p in results:
+                        pid = p.get_id()
+                        if pid not in seen:
+                            # Force-set conference for these targeted queries
+                            if not p.conference:
+                                p.conference = conf_name
+                            seen[pid] = p
+                        elif not seen[pid].conference:
+                            seen[pid].conference = conf_name
+                    logger.debug("ArXiv [conf:%s/%s]: %d", keyword, cat, len(results))
+                except Exception as exc:
+                    logger.error("ArXiv conf-query error [%s/%s]: %s", keyword, cat, exc)
+                time.sleep(ARXIV_DELAY)
 
         logger.info("ArXiv: %d unique papers collected", len(seen))
         return list(seen.values())
@@ -137,9 +155,8 @@ class ArxivScraper:
         end_date: date,
         max_results: int = MAX_RESULTS_PER_QUERY,
     ) -> List[Paper]:
-        # Format: YYYYMMDDHHMMSS
         date_from = start_date.strftime("%Y%m%d") + "000000"
-        date_to = end_date.strftime("%Y%m%d") + "235959"
+        date_to   = end_date.strftime("%Y%m%d") + "235959"
 
         query = (
             f'cat:{category} AND '
@@ -184,36 +201,32 @@ def _parse_entry(entry: ET.Element) -> Optional[Paper]:
 
     abstract = (entry.findtext("atom:summary", "", NS) or "").strip().replace("\n", " ")
 
-    # ArXiv ID
     id_url = entry.findtext("atom:id", "", NS) or ""
     arxiv_id: Optional[str] = None
     if id_url:
-        arxiv_id = id_url.rstrip("/").split("/")[-1]  # e.g. "2310.12345v2"
+        arxiv_id = id_url.rstrip("/").split("/")[-1]
 
-    # Authors
     authors = [
         (a.findtext("atom:name", "", NS) or "").strip()
         for a in entry.findall("atom:author", NS)
     ]
     authors = [a for a in authors if a]
 
-    # Published date
     published_str = entry.findtext("atom:published", "", NS) or ""
     pub_date: Optional[date] = None
     if published_str:
         try:
-            pub_date = datetime.fromisoformat(
-                published_str.replace("Z", "+00:00")
-            ).date()
+            pub_date = datetime.fromisoformat(published_str.replace("Z", "+00:00")).date()
         except ValueError:
             pass
 
-    # URL: prefer the abs link
-    url = f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else id_url
-
-    # Detect conference mention
-    combined = f"{title} {abstract}".lower()
+    # ArXiv journal_ref or comment may mention the accepted venue
+    comment   = (entry.findtext("arxiv:comment", "", NS) or "").strip()
+    jref      = (entry.findtext("arxiv:journal_ref", "", NS) or "").strip()
+    combined  = f"{title} {abstract} {comment} {jref}".lower()
     conference = _match_conference(combined)
+
+    url = f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else id_url
 
     return Paper(
         title=title,
