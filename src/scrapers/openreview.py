@@ -42,6 +42,11 @@ VENUE_CONF: Dict[str, List[str]] = {
         f"ICML.cc/{_CUR_YEAR}/Conference",
         f"ICML.cc/{_CUR_YEAR - 1}/Conference",
     ],
+    # AAAI moved to OpenReview starting from AAAI-2024.
+    "AAAI": [
+        f"AAAI.org/{_CUR_YEAR}/Conference",
+        f"AAAI.org/{_CUR_YEAR - 1}/Conference",
+    ],
 }
 
 # Representative search terms per topic
@@ -52,6 +57,11 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "multi-agent",
         "agentic",
         "tool use",
+        "language agent",
+        "web agent",
+        "gui agent",
+        "code agent",
+        "embodied agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -59,6 +69,8 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "llm evaluation",
         "benchmark",
         "evaluation framework",
+        "capability evaluation",
+        "model assessment",
     ],
     "Finance": [
         "financial",
@@ -66,6 +78,9 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "portfolio",
         "fraud detection",
         "cryptocurrency",
+        "stock prediction",
+        "risk management",
+        "fintech",
     ],
 }
 

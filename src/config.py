@@ -100,6 +100,20 @@ TOPICS = {
         "agent task",
         "agent environment",
         "agentic ai",
+        # CVPR-relevant: embodied AI / robotics agents
+        "embodied navigation",
+        "vision-language action",
+        "vision language action",
+        "robot manipulation",
+        "robot learning",
+        "autonomous driving",
+        "sim-to-real",
+        "visual navigation",
+        "task planning",
+        "instruction following",
+        # KDD-relevant: recommendation / knowledge agents
+        "recommendation agent",
+        "conversational agent",
     ],
     "Harness": [
         "harness",
@@ -124,6 +138,12 @@ TOPICS = {
         "safety evaluation",
         "model assessment",
         "evaluation methodology",
+        # Multimodal / vision evaluation (CVPR)
+        "multimodal benchmark",
+        "multimodal evaluation",
+        "visual benchmark",
+        "vqa benchmark",
+        "vision language evaluation",
     ],
     "Finance": [
         "finance",
@@ -170,6 +190,17 @@ TOPICS = {
         "finllm",
         "economic forecasting",
         "sentiment analysis stock",
+        # KDD-relevant finance topics
+        "financial time series",
+        "credit scoring",
+        "loan default",
+        "financial graph",
+        "insurance",
+        "payment fraud",
+        "transaction anomaly",
+        "market anomaly",
+        "financial knowledge graph",
+        "economic indicator",
     ],
 }
 

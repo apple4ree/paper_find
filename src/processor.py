@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 # Source display priority (lower = shown first in output)
 _SOURCE_PRIORITY = {
     "huggingface": 0,
-    "openreview": 1,        # conference-accepted papers rank highly
+    "openreview": 1,        # conference-accepted papers
+    "cvf": 1,               # CVPR proceedings (same tier as OpenReview)
     "huggingface_search": 2,
     "arxiv": 3,
     "semantic_scholar": 4,
