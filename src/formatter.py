@@ -17,6 +17,7 @@ _SOURCE_BADGE = {
     "openreview":         "OpenReview",
     "arxiv":              "arXiv",
     "semantic_scholar":   "Semantic Scholar",
+    "cvf":                "CVF Open Access",
 }
 
 
@@ -112,6 +113,8 @@ class PaperFormatter:
             meta.append("🤗")
         elif p.source == "openreview":
             meta.append("OpenReview")
+        elif p.source == "cvf":
+            meta.append("CVF")
         if p.published_date:
             meta.append(f"`{p.published_date}`")
 
