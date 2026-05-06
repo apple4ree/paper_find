@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 _SOURCE_PRIORITY = {
     "huggingface": 0,
     "openreview": 1,        # conference-accepted papers rank highly
+    "cvf": 1,               # CVF = CVPR/ICCV accepted papers
     "huggingface_search": 2,
     "arxiv": 3,
     "semantic_scholar": 4,
@@ -63,28 +64,64 @@ class PaperProcessor:
 # Module-level helpers
 # ---------------------------------------------------------------------------
 
+def _enrich(existing: "Paper", candidate: "Paper") -> None:
+    """Copy missing metadata from *candidate* into *existing* in-place."""
+    if candidate.conference and not existing.conference:
+        existing.conference = candidate.conference
+    if candidate.abstract and not existing.abstract:
+        existing.abstract = candidate.abstract
+    if candidate.year and not existing.year:
+        existing.year = candidate.year
+    if candidate.published_date and not existing.published_date:
+        existing.published_date = candidate.published_date
+    if candidate.arxiv_id and not existing.arxiv_id:
+        existing.arxiv_id = candidate.arxiv_id
+        # Upgrade URL to arxiv canonical form
+        if not existing.url or "semanticscholar" in existing.url:
+            existing.url = f"https://arxiv.org/abs/{candidate.arxiv_id}"
+    if _SOURCE_PRIORITY.get(candidate.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
+        existing.source = candidate.source
+
+
 def _deduplicate(papers: List[Paper]) -> List[Paper]:
-    """Merge duplicates, keeping the richest metadata."""
-    seen: Dict[str, Paper] = {}
+    """Merge duplicates, keeping the richest metadata.
+
+    Two passes:
+      1. Primary key: arXiv ID (stripped of version) or normalised title.
+      2. Secondary: after pass 1, merge any two records that share the same
+         normalised title (catches cases where one copy has an arXiv ID and
+         the other doesn't, producing different primary keys).
+    """
+    # --- Pass 1: primary-key dedup ---
+    by_id: Dict[str, "Paper"] = {}
     for p in papers:
         pid = p.get_id()
-        if pid not in seen:
-            seen[pid] = p
+        if pid not in by_id:
+            by_id[pid] = p
         else:
-            existing = seen[pid]
-            # Enrich existing record rather than replacing it
-            if p.conference and not existing.conference:
-                existing.conference = p.conference
-            if p.abstract and not existing.abstract:
-                existing.abstract = p.abstract
-            if p.year and not existing.year:
-                existing.year = p.year
-            if p.published_date and not existing.published_date:
-                existing.published_date = p.published_date
-            # Prefer higher-priority source when merging duplicates
-            if _SOURCE_PRIORITY.get(p.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
-                existing.source = p.source
-    return list(seen.values())
+            _enrich(by_id[pid], p)
+
+    # --- Pass 2: title-based dedup (catches arxiv vs non-arxiv copies) ---
+    by_title: Dict[str, "Paper"] = {}
+    kept: Dict[str, "Paper"] = {}  # pid → paper
+
+    for pid, p in by_id.items():
+        norm_title = " ".join(p.title.lower().split())
+        if norm_title in by_title:
+            # Merge into the earlier record
+            _enrich(by_title[norm_title], p)
+            # If the earlier record used a title-based ID, swap to arxiv ID
+            existing_pid = by_title[norm_title].get_id()
+            if existing_pid != pid and existing_pid in kept:
+                # Re-key if the existing paper now has an arXiv ID
+                new_pid = by_title[norm_title].get_id()
+                if new_pid != existing_pid:
+                    kept[new_pid] = kept.pop(existing_pid)
+        else:
+            by_title[norm_title] = p
+            kept[pid] = p
+
+    return list(kept.values())
 
 
 def _detect_conference(paper: Paper) -> Optional[str]:

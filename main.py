@@ -68,6 +68,11 @@ def parse_args() -> argparse.Namespace:
         help="Skip the OpenReview scraper (ICLR / NeurIPS / ICML).",
     )
     p.add_argument(
+        "--skip-cvf",
+        action="store_true",
+        help="Skip the CVF open access scraper (CVPR / ICCV).",
+    )
+    p.add_argument(
         "--s2-key",
         default=os.environ.get("SS_API_KEY", ""),
         help="Semantic Scholar API key (or set SS_API_KEY env var).",
@@ -127,6 +132,15 @@ def main() -> int:
         all_papers.extend(or_papers)
         source_counts["openreview"] += len(or_papers)
 
+    # ---- CVF open access ---------------------------------------------------
+    if not args.skip_cvf:
+        logger.info("=== CVF Open Access (CVPR / ICCV) ===")
+        from src.scrapers.cvf import CvfScraper
+        cvf_papers = CvfScraper().fetch()
+        logger.info("  collected %d papers", len(cvf_papers))
+        all_papers.extend(cvf_papers)
+        source_counts["cvf"] += len(cvf_papers)
+
     if not all_papers:
         logger.warning("No papers collected — check network access and try again.")
 
@@ -162,6 +176,7 @@ def main() -> int:
         "openreview":         "OpenReview (ICLR/NeurIPS/ICML)",
         "semantic_scholar":   "Semantic Scholar",
         "arxiv":              "arXiv",
+        "cvf":                "CVF Open Access (CVPR/ICCV)",
     }
     for src, cnt in sorted(source_counts.items(), key=lambda x: -x[1]):
         label = source_label.get(src, src)

@@ -17,6 +17,7 @@ _SOURCE_BADGE = {
     "openreview":         "OpenReview",
     "arxiv":              "arXiv",
     "semantic_scholar":   "Semantic Scholar",
+    "cvf":                "CVF",
 }
 
 
@@ -38,7 +39,7 @@ class PaperFormatter:
             "",
             "| Source | Topics |",
             "|--------|--------|",
-            "| AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview | Agent · Harness · Finance |",
+            "| AAAI · NeurIPS · ICML · ICLR · **CVPR** · **KDD** · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview · CVF | Agent · Harness · Finance |",
             "",
             (
                 f"**{unique_count} unique papers** "
@@ -112,6 +113,8 @@ class PaperFormatter:
             meta.append("🤗")
         elif p.source == "openreview":
             meta.append("OpenReview")
+        elif p.source == "cvf":
+            meta.append("CVF")
         if p.published_date:
             meta.append(f"`{p.published_date}`")
 
@@ -133,7 +136,7 @@ class PaperFormatter:
             "---",
             (
                 f"*Generated {target_date} · "
-                "Sources: HuggingFace Daily Papers, OpenReview, Semantic Scholar, arXiv*"
+                "Sources: HuggingFace Daily Papers, CVF Open Access, OpenReview, Semantic Scholar, arXiv*"
             ),
             "",
         ]

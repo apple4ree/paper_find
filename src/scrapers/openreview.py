@@ -26,6 +26,9 @@ _LIMIT = 25     # results per search call
 
 _CUR_YEAR = date.today().year
 
+# Only include papers from this year onwards (avoids stale data from old proceedings)
+MIN_YEAR = _CUR_YEAR - 1
+
 # Map canonical conference name → list of OpenReview venue IDs to query.
 # We try current year and previous year so that freshly-accepted papers
 # (e.g. ICLR 2026 camera-ready) are captured alongside 2025 proceedings.
@@ -164,6 +167,10 @@ def _field(content: dict, key: str) -> str:
 
 
 def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Paper]:
+    # Skip papers from years before our cutoff
+    if year is not None and year < MIN_YEAR:
+        return None
+
     content = item.get("content") or {}
 
     title = _field(content, "title").strip()
