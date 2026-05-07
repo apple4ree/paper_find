@@ -11,6 +11,8 @@ CONFERENCES = {
         "AAAI Conference on Artificial Intelligence",
         "Proceedings of the AAAI",
         "Association for the Advancement of Artificial Intelligence",
+        "AAAI '",          # matches "AAAI '25"
+        "AAAI.org",        # OpenReview venue ID prefix
     ],
     "NeurIPS": [
         "NeurIPS",
@@ -35,6 +37,8 @@ CONFERENCES = {
         "IEEE/CVF Conference",
         "IEEE Conference on Computer Vision",
         "CVPR 20",
+        "thecvf",          # OpenReview venue ID prefix
+        "cvpr '",          # matches "CVPR '25"
     ],
     "KDD": [
         "KDD",
@@ -42,6 +46,9 @@ CONFERENCES = {
         "ACM SIGKDD",
         "SIGKDD",
         "ACM KDD",
+        "KDD '",           # matches "KDD '25", "KDD '24"
+        "KDD2",            # matches "KDD2025", "KDD2024"
+        "kdd conference",
     ],
     "ACL": [
         "ACL",

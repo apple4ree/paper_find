@@ -29,6 +29,9 @@ _CUR_YEAR = date.today().year
 # Map canonical conference name → list of OpenReview venue IDs to query.
 # We try current year and previous year so that freshly-accepted papers
 # (e.g. ICLR 2026 camera-ready) are captured alongside 2025 proceedings.
+#
+# AAAI joined OpenReview starting with AAAI 2026.
+# CVPR joined OpenReview starting with CVPR 2024.
 VENUE_CONF: Dict[str, List[str]] = {
     "ICLR": [
         f"ICLR.cc/{_CUR_YEAR}/Conference",
@@ -41,6 +44,14 @@ VENUE_CONF: Dict[str, List[str]] = {
     "ICML": [
         f"ICML.cc/{_CUR_YEAR}/Conference",
         f"ICML.cc/{_CUR_YEAR - 1}/Conference",
+    ],
+    "AAAI": [
+        f"AAAI.org/{_CUR_YEAR}/Conference",
+        f"AAAI.org/{_CUR_YEAR - 1}/Conference",
+    ],
+    "CVPR": [
+        f"thecvf.com/CVPR/{_CUR_YEAR}/Conference",
+        f"thecvf.com/CVPR/{_CUR_YEAR - 1}/Conference",
     ],
 }
 
