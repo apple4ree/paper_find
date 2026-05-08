@@ -11,6 +11,7 @@ Usage
   python main.py --skip-s2             # skip Semantic Scholar
   python main.py --skip-hf             # skip HuggingFace
   python main.py --skip-openreview     # skip OpenReview (ICLR/NeurIPS/ICML)
+  python main.py --skip-cvf            # skip CVF Open Access (CVPR)
   python main.py --s2-key <key>        # use an S2 API key for higher limits
 """
 from __future__ import annotations
@@ -68,6 +69,11 @@ def parse_args() -> argparse.Namespace:
         help="Skip the OpenReview scraper (ICLR / NeurIPS / ICML).",
     )
     p.add_argument(
+        "--skip-cvf",
+        action="store_true",
+        help="Skip the CVF Open Access scraper (CVPR).",
+    )
+    p.add_argument(
         "--s2-key",
         default=os.environ.get("SS_API_KEY", ""),
         help="Semantic Scholar API key (or set SS_API_KEY env var).",
@@ -99,6 +105,15 @@ def main() -> int:
         all_papers.extend(hf_papers)
         for p in hf_papers:
             source_counts[p.source] += 1
+
+    # ---- CVF Open Access (CVPR) --------------------------------------------
+    if not args.skip_cvf:
+        logger.info("=== CVF Open Access (CVPR) ===")
+        from src.scrapers.cvf import CVFScraper
+        cvf_papers = CVFScraper().fetch(target_date)
+        logger.info("  collected %d papers", len(cvf_papers))
+        all_papers.extend(cvf_papers)
+        source_counts["cvf"] += len(cvf_papers)
 
     # ---- Semantic Scholar --------------------------------------------------
     if not args.skip_s2:
@@ -154,20 +169,21 @@ def main() -> int:
     print(f"  Daily Paper Digest  {target_date}")
     print(f"{'='*60}")
 
-    print(f"\n  {'Source':<25} {'Raw':>5}")
-    print(f"  {'-'*35}")
+    print(f"\n  {'Source':<30} {'Raw':>5}")
+    print(f"  {'-'*38}")
     source_label = {
         "huggingface":        "HuggingFace (daily)",
         "huggingface_search": "HuggingFace (search)",
         "openreview":         "OpenReview (ICLR/NeurIPS/ICML)",
         "semantic_scholar":   "Semantic Scholar",
         "arxiv":              "arXiv",
+        "cvf":                "CVF Open Access (CVPR)",
     }
     for src, cnt in sorted(source_counts.items(), key=lambda x: -x[1]):
         label = source_label.get(src, src)
-        print(f"  {label:<25} {cnt:>5}")
-    print(f"  {'─'*35}")
-    print(f"  {'Total raw':<25} {len(all_papers):>5}")
+        print(f"  {label:<30} {cnt:>5}")
+    print(f"  {'─'*38}")
+    print(f"  {'Total raw':<30} {len(all_papers):>5}")
 
     print(f"\n  {'Topic':<15} {'Papers':>7}")
     print(f"  {'-'*25}")

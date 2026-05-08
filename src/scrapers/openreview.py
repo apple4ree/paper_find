@@ -1,8 +1,10 @@
 """
 OpenReview scraper for ICLR, NeurIPS, and ICML conference papers.
 
-Uses the OpenReview API v2 to search for accepted papers by topic keyword.
-Covers the current and previous year for each hosted venue.
+Uses the OpenReview API v2 text-search endpoint (/notes/search) WITHOUT a
+venue filter at the API level — the venue filter was unreliable and caused
+ICLR results to be silently dropped.  Instead we filter results locally by
+checking each note's content.venueid field against our target venue IDs.
 
 API base: https://api2.openreview.net
 """
@@ -12,7 +14,7 @@ import logging
 import re
 import time
 from datetime import date, datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import requests
 
@@ -21,14 +23,13 @@ from ..models import Paper
 logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
-_DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
-_LIMIT = 25     # results per search call
+_DELAY = 1.5    # seconds between requests
+_LIMIT = 50     # results per search call (increased from 25)
 
 _CUR_YEAR = date.today().year
 
-# Map canonical conference name → list of OpenReview venue IDs to query.
-# We try current year and previous year so that freshly-accepted papers
-# (e.g. ICLR 2026 camera-ready) are captured alongside 2025 proceedings.
+# Map canonical conference name → list of OpenReview venue IDs to check.
+# We try current year and previous year to capture freshly-accepted papers.
 VENUE_CONF: Dict[str, List[str]] = {
     "ICLR": [
         f"ICLR.cc/{_CUR_YEAR}/Conference",
@@ -44,14 +45,26 @@ VENUE_CONF: Dict[str, List[str]] = {
     ],
 }
 
-# Representative search terms per topic
+# Flattened lookup: lowercase venue_id prefix → canonical name + year
+_VENUE_MAP: Dict[str, Tuple[str, int]] = {
+    vid.lower(): (conf, int(re.search(r"/(\d{4})/", vid).group(1)))  # type: ignore[union-attr]
+    for conf, vids in VENUE_CONF.items()
+    for vid in vids
+}
+
+# Representative search terms per topic (broader = more recall)
 TOPIC_QUERIES: Dict[str, List[str]] = {
     "Agent": [
         "llm agent",
+        "language model agent",
         "autonomous agent",
         "multi-agent",
         "agentic",
         "tool use",
+        "function calling",
+        "gui agent",
+        "web agent",
+        "code agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -59,6 +72,8 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "llm evaluation",
         "benchmark",
         "evaluation framework",
+        "evaluation suite",
+        "model assessment",
     ],
     "Finance": [
         "financial",
@@ -66,6 +81,9 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "portfolio",
         "fraud detection",
         "cryptocurrency",
+        "stock market",
+        "fintech",
+        "risk management",
     ],
 }
 
@@ -84,57 +102,34 @@ class OpenReviewScraper:
         """Return ICLR/NeurIPS/ICML papers matching Agent/Harness/Finance keywords."""
         seen: Dict[str, Paper] = {}
 
-        for conf_name, venue_ids in VENUE_CONF.items():
-            for venue_id in venue_ids:
-                year_m = _YEAR_RE.search(venue_id)
-                year = int(year_m.group(1)) if year_m else None
-
-                for topic, queries in TOPIC_QUERIES.items():
-                    for query in queries:
-                        try:
-                            batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
-                            for p in batch:
-                                pid = p.get_id()
-                                if pid not in seen:
-                                    seen[pid] = p
-                            if batch:
-                                logger.debug(
-                                    "OpenReview [%s %s / '%s']: %d",
-                                    conf_name, year or "?", query, len(batch),
-                                )
-                        except Exception as exc:
-                            logger.warning(
-                                "OpenReview [%s %s / '%s']: %s",
-                                conf_name, year or "?", query, exc,
-                            )
-                        time.sleep(_DELAY)
+        for topic, queries in TOPIC_QUERIES.items():
+            for query in queries:
+                try:
+                    batch = self._search(query)
+                    new_count = 0
+                    for p in batch:
+                        pid = p.get_id()
+                        if pid not in seen:
+                            seen[pid] = p
+                            new_count += 1
+                    if batch:
+                        logger.debug(
+                            "OpenReview ['%s']: %d results (%d new)", query, len(batch), new_count
+                        )
+                except Exception as exc:
+                    logger.warning("OpenReview ['%s']: %s", query, exc)
+                time.sleep(_DELAY)
 
         logger.info("OpenReview: %d unique papers collected", len(seen))
         return list(seen.values())
 
     # ------------------------------------------------------------------
 
-    def _search(
-        self,
-        query: str,
-        venue_id: str,
-        conf_name: str,
-        year: Optional[int],
-    ) -> List[Paper]:
+    def _search(self, query: str) -> List[Paper]:
+        """Text-search OpenReview; filter by target venue IDs locally."""
         resp = self.session.get(
             f"{_API}/notes/search",
-            params={
-                "term": query,
-                "content.venueid": venue_id,
-                "offset": 0,
-                "limit": _LIMIT,
-            },
+            params={"term": query, "offset": 0, "limit": _LIMIT},
             timeout=30,
         )
         resp.raise_for_status()
@@ -142,10 +137,37 @@ class OpenReviewScraper:
 
         papers: List[Paper] = []
         for item in data.get("notes") or []:
+            content = item.get("content") or {}
+            raw_venue_id = _field(content, "venueid").strip()
+
+            # Match this note's venue ID to one of our target conferences
+            result = _match_venue(raw_venue_id)
+            if not result:
+                continue
+            conf_name, year = result
+
             p = _parse_note(item, conf_name, year)
             if p:
                 papers.append(p)
+
         return papers
+
+
+# ---------------------------------------------------------------------------
+# Venue matching
+# ---------------------------------------------------------------------------
+
+def _match_venue(raw_venue_id: str) -> Optional[Tuple[str, int]]:
+    """Return (conf_name, year) if *raw_venue_id* matches a target venue."""
+    lower = raw_venue_id.lower()
+    # Exact match first
+    if lower in _VENUE_MAP:
+        return _VENUE_MAP[lower]
+    # Prefix / substring match (handles track suffixes like /Spotlight)
+    for vid_prefix, info in _VENUE_MAP.items():
+        if lower.startswith(vid_prefix):
+            return info
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +185,7 @@ def _field(content: dict, key: str) -> str:
     return str(v or "")
 
 
-def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Paper]:
+def _parse_note(item: dict, conf_name: str, year: int) -> Optional[Paper]:
     content = item.get("content") or {}
 
     title = _field(content, "title").strip()

@@ -28,9 +28,12 @@ SS_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 _DELAY_NO_KEY = 1.5
 _DELAY_WITH_KEY = 0.5
 
-# Representative search terms per topic — broad enough to catch most papers
+# Representative search terms per topic.
+# Organised so that generic terms come first (highest recall), then
+# conference-specific / domain-specific terms follow.
 TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     "Agent": [
+        # General LLM agents
         "llm agent",
         "language model agent",
         "autonomous agent",
@@ -38,9 +41,20 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "agentic workflow",
         "tool-augmented language model",
         "function calling",
+        # Specialised agent types
         "gui agent",
         "web agent",
         "code agent",
+        # CVPR / vision-centric agents
+        "embodied agent",
+        "embodied AI",
+        "vision language agent",
+        "visual agent",
+        "robotic agent",
+        "autonomous driving agent",
+        # Other modalities
+        "planning agent",
+        "robot learning",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +64,13 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        # Vision / multimodal evaluation
+        "vision language model evaluation",
+        "multimodal benchmark",
+        "visual benchmark",
+        # Safety and alignment evaluation
+        "safety evaluation language model",
+        "red teaming benchmark",
     ],
     "Finance": [
         "financial large language model",
@@ -62,6 +83,12 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        # Additional finance topics
+        "systemic risk",
+        "high frequency trading",
+        "robo advisor",
+        "financial forecasting",
+        "financial NLP",
     ],
 }
 
@@ -119,7 +146,6 @@ class SemanticScholarScraper:
                         logger.error("S2 HTTP error [%s / %s]: %s", topic, term, exc)
                 except Exception as exc:
                     logger.error("S2 error [%s / %s]: %s", topic, term, exc)
-                # Polite delay to stay within rate limits
                 time.sleep(self._delay)
 
         logger.info("Semantic Scholar: %d unique papers collected", len(seen))
