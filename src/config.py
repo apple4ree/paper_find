@@ -180,8 +180,11 @@ ARXIV_CATEGORIES = [
     "cs.AI",    # Artificial Intelligence
     "cs.LG",    # Machine Learning
     "cs.CL",    # Computation and Language (NLP)
-    "cs.CV",    # Computer Vision
+    "cs.CV",    # Computer Vision (CVPR)
     "cs.MA",    # Multi-Agent Systems
+    "cs.RO",    # Robotics (embodied agents / CVPR)
+    "cs.SI",    # Social and Information Networks (KDD)
+    "cs.IR",    # Information Retrieval (KDD recommendation)
     "q-fin.TR", # Trading and Market Microstructure
     "q-fin.PM", # Portfolio Management
     "q-fin.RM", # Risk Management

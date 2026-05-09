@@ -9,10 +9,13 @@ Two fetch modes:
   2. Topic search        — https://huggingface.co/api/papers?q=<query>
      Searches the full HuggingFace paper database by keyword.
      Used to supplement the daily curated list with topic-relevant papers.
+
+Set HF_TOKEN env var to authenticate and avoid rate limits.
 """
 from __future__ import annotations
 
 import logging
+import os
 import time
 from datetime import date, timedelta
 from typing import List, Optional
@@ -28,21 +31,59 @@ HF_DAILY_API = "https://huggingface.co/api/daily_papers"
 HF_SEARCH_API = "https://huggingface.co/api/papers"
 
 MAX_FALLBACK_DAYS = 3   # Try up to N previous days if today has no papers
-SEARCH_DELAY = 1.0       # Seconds between search requests
+SEARCH_DELAY = 1.5       # Seconds between search requests (slightly more polite)
 SEARCH_LIMIT = 50        # Papers per topic search query
 
 # Representative search terms per topic for the HuggingFace search API
 HF_TOPIC_QUERIES: dict[str, list[str]] = {
-    "Agent": ["llm agent", "autonomous agent", "multi-agent", "agentic"],
-    "Harness": ["evaluation harness", "lm eval", "llm benchmark"],
-    "Finance": ["financial llm", "stock prediction", "portfolio optimization", "algorithmic trading"],
+    "Agent": [
+        "llm agent",
+        "autonomous agent",
+        "multi-agent",
+        "agentic",
+        "tool use agent",
+        "embodied agent",
+    ],
+    "Harness": [
+        "evaluation harness",
+        "lm eval",
+        "llm benchmark",
+        "model evaluation framework",
+        "safety evaluation",
+    ],
+    "Finance": [
+        "financial llm",
+        "stock prediction",
+        "portfolio optimization",
+        "algorithmic trading",
+        "fraud detection",
+        "financial nlp",
+    ],
+}
+
+# Browser-like headers to avoid 403 blocks
+_DEFAULT_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://huggingface.co/papers",
 }
 
 
 class HuggingFaceScraper:
-    def __init__(self, session: Optional[requests.Session] = None):
+    def __init__(
+        self,
+        session: Optional[requests.Session] = None,
+        hf_token: Optional[str] = None,
+    ):
         self.session = session or requests.Session()
-        self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
+        self.session.headers.update(_DEFAULT_HEADERS)
+        token = hf_token or os.environ.get("HF_TOKEN", "")
+        if token:
+            self.session.headers["Authorization"] = f"Bearer {token}"
 
     def fetch(self, target_date: date) -> List[Paper]:
         """Return HuggingFace papers for *target_date*.

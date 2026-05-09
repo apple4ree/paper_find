@@ -42,6 +42,14 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "agentic",
         "tool use",
         "autonomous agent",
+        # CVPR-relevant
+        "embodied agent",
+        "vision language agent",
+        "visual agent",
+        "robot agent",
+        # KDD-relevant
+        "knowledge graph agent",
+        "graph agent",
     ],
     "Harness": [
         "harness",
@@ -49,6 +57,11 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "evaluation framework",
         "llm benchmark",
         "evaluation suite",
+        # CVPR-relevant
+        "vision benchmark",
+        "multimodal benchmark",
+        # KDD-relevant
+        "graph benchmark",
     ],
     "Finance": [
         "financial",
@@ -58,14 +71,19 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "fraud detection",
         "cryptocurrency",
         "fintech",
+        # KDD-relevant
+        "financial graph",
+        "transaction fraud",
+        "credit risk graph",
+        "anti-money laundering",
     ],
 }
 
 # ArXiv categories grouped by topic affinity
 TOPIC_CATEGORIES: Dict[str, List[str]] = {
-    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
-    "Harness": ["cs.AI", "cs.LG", "cs.CL"],
-    "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP"],
+    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA", "cs.CV", "cs.RO"],
+    "Harness": ["cs.AI", "cs.LG", "cs.CL", "cs.CV"],
+    "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP", "cs.SI"],
 }
 
 
