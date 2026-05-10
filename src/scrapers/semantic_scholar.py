@@ -65,6 +65,29 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     ],
 }
 
+# Venue-scoped searches: for conferences NOT on OpenReview (AAAI, CVPR, KDD)
+# we explicitly inject venue aliases to raise recall.
+# Each entry: (topic, search_term, venue_hint)
+VENUE_SCOPED_TERMS: List[tuple[str, str, str]] = [
+    # CVPR — visual agents, video understanding, embodied AI
+    ("Agent",   "visual agent",             "CVPR"),
+    ("Agent",   "embodied agent",           "CVPR"),
+    ("Agent",   "robot agent vision",       "CVPR"),
+    ("Harness", "vision benchmark",         "CVPR"),
+    ("Harness", "visual evaluation",        "CVPR"),
+    ("Finance", "financial image",          "CVPR"),
+    # KDD — data-mining angle on finance + agents
+    ("Agent",   "agent data mining",        "KDD"),
+    ("Agent",   "recommendation agent",     "KDD"),
+    ("Finance", "financial data mining",    "KDD"),
+    ("Finance", "stock prediction graph",   "KDD"),
+    ("Finance", "fraud detection graph",    "KDD"),
+    ("Harness", "evaluation data mining",   "KDD"),
+    # AAAI — broad AI; supplement Semantic Scholar keyword search
+    ("Agent",   "planning agent aaai",      "AAAI"),
+    ("Finance", "financial forecasting",    "AAAI"),
+]
+
 
 class SemanticScholarScraper:
     def __init__(
@@ -89,41 +112,50 @@ class SemanticScholarScraper:
         current_year = date.today().year
         year_range = f"{current_year - 1}-{current_year}"
 
+        # --- General topic keyword search ---
         for topic, terms in TOPIC_SEARCH_TERMS.items():
             for term in terms:
-                try:
-                    results = self._search(term, year_range)
-                    new_count = 0
-                    for p in results:
-                        pid = p.get_id()
-                        if pid not in seen:
-                            seen[pid] = p
-                            new_count += 1
-                    logger.debug(
-                        "S2 [%s / %s]: %d results (%d new)",
-                        topic, term, len(results), new_count,
-                    )
-                except requests.exceptions.HTTPError as exc:
-                    if exc.response is not None and exc.response.status_code == 429:
-                        logger.warning("S2 rate limited; sleeping 30s then retrying")
-                        time.sleep(30)
-                        try:
-                            results = self._search(term, year_range)
-                            for p in results:
-                                pid = p.get_id()
-                                if pid not in seen:
-                                    seen[pid] = p
-                        except Exception as retry_exc:
-                            logger.error("S2 retry failed [%s / %s]: %s", topic, term, retry_exc)
-                    else:
-                        logger.error("S2 HTTP error [%s / %s]: %s", topic, term, exc)
-                except Exception as exc:
-                    logger.error("S2 error [%s / %s]: %s", topic, term, exc)
-                # Polite delay to stay within rate limits
-                time.sleep(self._delay)
+                self._run_search(term, year_range, seen, label=f"{topic}/{term}")
+
+        # --- Venue-scoped searches for AAAI / CVPR / KDD ---
+        for topic, term, venue_hint in VENUE_SCOPED_TERMS:
+            scoped_query = f"{term} {venue_hint}"
+            self._run_search(scoped_query, year_range, seen, label=f"{topic}/{venue_hint}/{term}")
 
         logger.info("Semantic Scholar: %d unique papers collected", len(seen))
         return list(seen.values())
+
+    def _run_search(
+        self,
+        query: str,
+        year_range: str,
+        seen: Dict[str, Paper],
+        label: str = "",
+    ) -> None:
+        """Execute one search query, merge results into *seen*, handle rate limits."""
+        try:
+            results = self._search(query, year_range)
+            for p in results:
+                pid = p.get_id()
+                if pid not in seen:
+                    seen[pid] = p
+            logger.debug("S2 [%s]: %d results", label, len(results))
+        except requests.exceptions.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 429:
+                logger.warning("S2 rate limited; sleeping 30s then retrying [%s]", label)
+                time.sleep(30)
+                try:
+                    for p in self._search(query, year_range):
+                        pid = p.get_id()
+                        if pid not in seen:
+                            seen[pid] = p
+                except Exception as retry_exc:
+                    logger.error("S2 retry failed [%s]: %s", label, retry_exc)
+            else:
+                logger.error("S2 HTTP error [%s]: %s", label, exc)
+        except Exception as exc:
+            logger.error("S2 error [%s]: %s", label, exc)
+        time.sleep(self._delay)
 
     # ------------------------------------------------------------------
     # Internal helpers

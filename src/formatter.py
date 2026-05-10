@@ -3,6 +3,7 @@ Markdown formatter for the daily paper digest.
 """
 from __future__ import annotations
 
+from collections import Counter
 from datetime import date
 from typing import Dict, List
 
@@ -19,54 +20,52 @@ _SOURCE_BADGE = {
     "semantic_scholar":   "Semantic Scholar",
 }
 
+_ABSTRACT_LEN = 250
+
 
 class PaperFormatter:
     def format(self, categorized: Dict[str, List[Paper]], target_date: date) -> str:
         lines: List[str] = []
 
-        # Unique papers across all topics
-        unique_papers = {
-            id(p)
-            for plist in categorized.values()
-            for p in plist
-        }
-        unique_count = len(unique_papers)
+        all_papers = {id(p) for plist in categorized.values() for p in plist}
+        unique_count = len(all_papers)
         total_entries = sum(len(v) for v in categorized.values())
 
         lines += [
             f"# Daily Paper Digest — {target_date.strftime('%Y-%m-%d (%A)')}",
             "",
-            "| Source | Topics |",
-            "|--------|--------|",
-            "| AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview | Agent · Harness · Finance |",
+            "> **Sources**: AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · HuggingFace · OpenReview · arXiv · Semantic Scholar  ",
+            "> **Topics**: Agent · Harness · Finance",
             "",
             (
                 f"**{unique_count} unique papers** "
-                f"({total_entries} topic-entries — cross-topic papers counted once per category)"
+                f"({total_entries} topic-entries — a paper covering multiple topics is counted once per category)"
             ),
             "",
-            "---",
-            "",
         ]
+
+        # --- Summary table: rows = topics, columns = conferences ---
+        lines += self._summary_table(categorized)
+        lines += ["", "---", ""]
 
         if unique_count == 0:
             lines += [
                 "> No matching papers found today.",
-                "> Try running with `--lookback` set to a larger value.",
+                "> Try running with `--skip-arxiv false` or a wider date range.",
                 "",
             ]
             lines += self._footer(target_date)
             return "\n".join(lines)
 
         for topic, papers in categorized.items():
-            lines.append(f"## {topic}  ({len(papers)})")
+            lines.append(f"## {topic}  ({len(papers)} papers)")
             lines.append("")
 
             if not papers:
                 lines += ["*No papers found for this topic today.*", ""]
                 continue
 
-            # Group by conference, preserve defined order
+            # Group by conference
             by_conf: Dict[str, List[Paper]] = {}
             for p in papers:
                 key = p.conference or "Other / arXiv"
@@ -79,9 +78,10 @@ class PaperFormatter:
             for conf in ordered_confs:
                 if conf not in by_conf:
                     continue
-                lines.append(f"### {conf}")
+                conf_papers = by_conf[conf]
+                lines.append(f"### {conf}  ({len(conf_papers)})")
                 lines.append("")
-                for p in by_conf[conf]:
+                for p in conf_papers:
                     lines += self._format_paper(p)
                 lines.append("")
 
@@ -90,10 +90,40 @@ class PaperFormatter:
 
     # ------------------------------------------------------------------
 
+    def _summary_table(self, categorized: Dict[str, List[Paper]]) -> List[str]:
+        """Build a compact Markdown table: topics × conferences."""
+        confs = _CONF_ORDER + ["Other / arXiv"]
+
+        # count[topic][conf] = n
+        counts: Dict[str, Counter] = {}
+        for topic, papers in categorized.items():
+            c: Counter = Counter()
+            for p in papers:
+                c[p.conference or "Other / arXiv"] += 1
+            counts[topic] = c
+
+        header = "| Topic | " + " | ".join(confs) + " | **Total** |"
+        sep    = "|-------|" + "|".join(["-------"] * len(confs)) + "|---------|"
+        rows: List[str] = [header, sep]
+
+        for topic, papers in categorized.items():
+            c = counts[topic]
+            cells = " | ".join(str(c.get(cf, 0)) for cf in confs)
+            rows.append(f"| **{topic}** | {cells} | **{len(papers)}** |")
+
+        # Totals row
+        totals: Counter = Counter()
+        for c in counts.values():
+            totals.update(c)
+        total_cells = " | ".join(str(totals.get(cf, 0)) for cf in confs)
+        grand = sum(totals.values())
+        rows.append(f"| *Total* | {total_cells} | *{grand}* |")
+
+        return rows
+
     def _format_paper(self, p: Paper) -> List[str]:
         title_md = f"[{p.title}]({p.url})" if p.url else p.title
 
-        # Author line (cap at 3 + "et al.")
         authors_str = ""
         if p.authors:
             shown = p.authors[:3]
@@ -101,7 +131,6 @@ class PaperFormatter:
             if len(p.authors) > 3:
                 authors_str += " et al."
 
-        # Meta badges
         meta: List[str] = []
         if p.conference:
             year = f" {p.year}" if p.year else ""
@@ -121,8 +150,8 @@ class PaperFormatter:
         if meta:
             lines.append(f"  - {' · '.join(meta)}")
         if p.abstract:
-            snippet = p.abstract[:280].rstrip()
-            if len(p.abstract) > 280:
+            snippet = p.abstract[:_ABSTRACT_LEN].rstrip()
+            if len(p.abstract) > _ABSTRACT_LEN:
                 snippet += "…"
             lines.append(f"  - {snippet}")
         lines.append("")

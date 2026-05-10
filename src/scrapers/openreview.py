@@ -25,6 +25,7 @@ _DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
 _LIMIT = 25     # results per search call
 
 _CUR_YEAR = date.today().year
+_MIN_YEAR = 2023   # ignore papers whose cdate implies an older-than-this year
 
 # Map canonical conference name → list of OpenReview venue IDs to query.
 # We try current year and previous year so that freshly-accepted papers
@@ -201,6 +202,12 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
                 break
             except (ValueError, TypeError, OSError):
                 pass
+
+    # Reject papers whose actual publication date is suspiciously old.
+    # This filters placeholder cdates (epoch 0 → 1970, or very old papers)
+    # that OpenReview search occasionally surfaces inside a recent venue.
+    if pub_date and pub_date.year < _MIN_YEAR:
+        return None
 
     return Paper(
         title=title,

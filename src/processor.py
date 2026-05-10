@@ -4,6 +4,7 @@ Paper processor: deduplication, conference detection, and topic assignment.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Dict, List, Optional
 
 from .config import CONFERENCES, TOPICS
@@ -20,13 +21,20 @@ _SOURCE_PRIORITY = {
     "semantic_scholar": 4,
 }
 
+_PUNCT_RE = re.compile(r"[^\w\s]")
+
+
+def _norm_title(title: str) -> str:
+    """Normalize title for fuzzy deduplication: lowercase, strip punctuation, collapse spaces."""
+    return " ".join(_PUNCT_RE.sub(" ", title.lower()).split())
+
 
 class PaperProcessor:
     """Deduplicate papers, detect conferences, and assign topic labels."""
 
     def process(self, papers: List[Paper]) -> Dict[str, List[Paper]]:
         """Return a dict mapping each topic to its de-duplicated, filtered papers."""
-        # 1. Deduplicate across all sources
+        # 1. Deduplicate across all sources (two-pass)
         deduped = _deduplicate(papers)
         logger.info("Dedup: %d → %d papers", len(papers), len(deduped))
 
@@ -63,28 +71,55 @@ class PaperProcessor:
 # Module-level helpers
 # ---------------------------------------------------------------------------
 
+def _merge_into(existing: Paper, incoming: Paper) -> None:
+    """Enrich *existing* with metadata from *incoming*."""
+    if incoming.conference and not existing.conference:
+        existing.conference = incoming.conference
+    if incoming.abstract and not existing.abstract:
+        existing.abstract = incoming.abstract
+    if incoming.year and not existing.year:
+        existing.year = incoming.year
+    if incoming.published_date and not existing.published_date:
+        existing.published_date = incoming.published_date
+    if incoming.arxiv_id and not existing.arxiv_id:
+        existing.arxiv_id = incoming.arxiv_id
+        if not existing.url or "semanticscholar" in existing.url:
+            existing.url = f"https://arxiv.org/abs/{incoming.arxiv_id}"
+    if _SOURCE_PRIORITY.get(incoming.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
+        existing.source = incoming.source
+
+
 def _deduplicate(papers: List[Paper]) -> List[Paper]:
-    """Merge duplicates, keeping the richest metadata."""
-    seen: Dict[str, Paper] = {}
+    """Two-pass deduplication: first by arxiv_id, then by normalized title.
+
+    A paper scraped from OpenReview may lack an arXiv link while the same
+    paper from arXiv/Semantic Scholar has one, giving them different get_id()
+    keys despite being identical.  We resolve this by building a secondary
+    index on normalized titles and unifying any collisions.
+    """
+    # Pass 1: index by the primary key (arxiv_id or normalized title)
+    by_key: Dict[str, Paper] = {}
     for p in papers:
         pid = p.get_id()
-        if pid not in seen:
-            seen[pid] = p
+        if pid not in by_key:
+            by_key[pid] = p
         else:
-            existing = seen[pid]
-            # Enrich existing record rather than replacing it
-            if p.conference and not existing.conference:
-                existing.conference = p.conference
-            if p.abstract and not existing.abstract:
-                existing.abstract = p.abstract
-            if p.year and not existing.year:
-                existing.year = p.year
-            if p.published_date and not existing.published_date:
-                existing.published_date = p.published_date
-            # Prefer higher-priority source when merging duplicates
-            if _SOURCE_PRIORITY.get(p.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
-                existing.source = p.source
-    return list(seen.values())
+            _merge_into(by_key[pid], p)
+
+    candidates = list(by_key.values())
+
+    # Pass 2: secondary dedup by normalized title across different primary keys
+    by_title: Dict[str, Paper] = {}
+    final: List[Paper] = []
+    for p in candidates:
+        nt = _norm_title(p.title)
+        if nt in by_title:
+            _merge_into(by_title[nt], p)
+        else:
+            by_title[nt] = p
+            final.append(p)
+
+    return final
 
 
 def _detect_conference(paper: Paper) -> Optional[str]:
