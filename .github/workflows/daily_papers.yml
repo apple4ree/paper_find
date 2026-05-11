@@ -32,6 +32,12 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      skip_cvf:
+        description: "Skip CVF open-access scraper (CVPR)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 jobs:
   digest:
@@ -72,7 +78,9 @@ jobs:
             echo "value=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Run paper finder
+      - name: Run paper finder (attempt 1)
+        id: run1
+        continue-on-error: true
         env:
           SS_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
         run: |
@@ -85,6 +93,32 @@ jobs:
           fi
           if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
             SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
+          fi
+          if [ "${{ github.event.inputs.skip_cvf }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-cvf"
+          fi
+          python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
+
+      # Retry once on failure (transient network issues are common)
+      - name: Run paper finder (retry on failure)
+        if: steps.run1.outcome == 'failure'
+        env:
+          SS_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+        run: |
+          echo "First attempt failed — retrying after 30s delay"
+          sleep 30
+          SKIP_FLAGS=""
+          if [ "${{ github.event.inputs.skip_arxiv }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-arxiv"
+          fi
+          if [ "${{ github.event.inputs.skip_s2 }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-s2"
+          fi
+          if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
+          fi
+          if [ "${{ github.event.inputs.skip_cvf }}" = "true" ]; then
+            SKIP_FLAGS="$SKIP_FLAGS --skip-cvf"
           fi
           python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
 

@@ -17,30 +17,41 @@ from typing import Dict, List, Optional
 
 import requests
 
-from ..config import CONFERENCES, LOOKBACK_DAYS, SS_FIELDS, TOPICS
+from ..config import CONFERENCES, SS_FIELDS, TOPICS
 from ..models import Paper
 
 logger = logging.getLogger(__name__)
 
 SS_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 
-# Delay between S2 requests (seconds): 1.5s without key, 0.5s with key
 _DELAY_NO_KEY = 1.5
 _DELAY_WITH_KEY = 0.5
 
-# Representative search terms per topic — broad enough to catch most papers
+# Per-topic search terms: broad enough to cover Agent / Harness / Finance papers
+# published at the six required conferences (AAAI, NeurIPS, ICML, ICLR, CVPR, KDD)
+# as well as other top venues.
 TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     "Agent": [
+        # Core agent terms
         "llm agent",
         "language model agent",
         "autonomous agent",
         "multi-agent system",
         "agentic workflow",
+        # Tool / action
         "tool-augmented language model",
-        "function calling",
+        "function calling language model",
+        # Specialised agent types
         "gui agent",
         "web agent",
         "code agent",
+        "embodied language agent",
+        # Planning / reasoning
+        "agent planning",
+        "agent reasoning",
+        # Conference-specific: CVPR / vision agents
+        "vision language agent",
+        "multimodal agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,18 +61,39 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        "model assessment framework",
+        "safety benchmark",
     ],
     "Finance": [
+        # LLM × Finance
         "financial large language model",
+        "financial llm",
+        "finllm",
+        # Market prediction
         "stock market prediction",
-        "portfolio optimization",
-        "algorithmic trading",
+        "stock price prediction",
+        "market forecasting deep learning",
+        # Portfolio / risk
+        "portfolio optimization deep learning",
+        "portfolio management reinforcement learning",
         "credit risk prediction",
+        "systemic risk neural",
+        # Trading
+        "algorithmic trading deep learning",
+        "high-frequency trading machine learning",
+        "market microstructure machine learning",
+        # Fraud / AML
         "fraud detection deep learning",
+        "anti-money laundering machine learning",
+        # Crypto
         "cryptocurrency prediction",
+        "blockchain machine learning",
+        # Sentiment / NLP
         "financial sentiment analysis",
-        "market microstructure",
+        "financial news nlp",
+        # Fintech / general
         "fintech deep learning",
+        "robo-advisor machine learning",
     ],
 }
 
@@ -114,12 +146,13 @@ class SemanticScholarScraper:
                                 if pid not in seen:
                                     seen[pid] = p
                         except Exception as retry_exc:
-                            logger.error("S2 retry failed [%s / %s]: %s", topic, term, retry_exc)
+                            logger.error(
+                                "S2 retry failed [%s / %s]: %s", topic, term, retry_exc
+                            )
                     else:
                         logger.error("S2 HTTP error [%s / %s]: %s", topic, term, exc)
                 except Exception as exc:
                     logger.error("S2 error [%s / %s]: %s", topic, term, exc)
-                # Polite delay to stay within rate limits
                 time.sleep(self._delay)
 
         logger.info("Semantic Scholar: %d unique papers collected", len(seen))
@@ -152,16 +185,14 @@ class SemanticScholarScraper:
         if not title:
             return None
 
-        # Conference matching: check venue field against known aliases
         venue = (item.get("venue") or "").strip()
         matched_conf = _match_conference(venue)
         if not matched_conf:
-            return None  # Skip papers not from our target conferences
+            return None
 
         ext_ids = item.get("externalIds") or {}
         arxiv_id = ext_ids.get("ArXiv") or None
 
-        # Prefer ArXiv URL, then openAccessPdf, then S2 page
         url = ""
         if arxiv_id:
             url = f"https://arxiv.org/abs/{arxiv_id}"
