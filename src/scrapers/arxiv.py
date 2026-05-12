@@ -42,6 +42,12 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "agentic",
         "tool use",
         "autonomous agent",
+        # CVPR-style visual/embodied agent terms
+        "embodied agent",
+        "visual agent",
+        "robotic manipulation",
+        "navigation agent",
+        "gui agent",
     ],
     "Harness": [
         "harness",
@@ -63,7 +69,7 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
 
 # ArXiv categories grouped by topic affinity
 TOPIC_CATEGORIES: Dict[str, List[str]] = {
-    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
+    "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA", "cs.CV", "cs.RO"],
     "Harness": ["cs.AI", "cs.LG", "cs.CL"],
     "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP"],
 }

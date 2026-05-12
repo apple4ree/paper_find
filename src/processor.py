@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 _SOURCE_PRIORITY = {
     "huggingface": 0,
     "openreview": 1,        # conference-accepted papers rank highly
+    "cvf": 1,               # CVF = CVPR accepted, same tier as OpenReview
     "huggingface_search": 2,
     "arxiv": 3,
     "semantic_scholar": 4,

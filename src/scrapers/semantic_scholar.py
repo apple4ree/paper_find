@@ -41,6 +41,13 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        # CVPR/vision/embodied agent terms
+        "embodied agent",
+        "visual agent",
+        "robotic manipulation learning",
+        "visual navigation agent",
+        "instruction following robot",
+        "grounded language agent",
     ],
     "Harness": [
         "evaluation harness",
