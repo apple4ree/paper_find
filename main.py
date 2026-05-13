@@ -11,6 +11,7 @@ Usage
   python main.py --skip-s2             # skip Semantic Scholar
   python main.py --skip-hf             # skip HuggingFace
   python main.py --skip-openreview     # skip OpenReview (ICLR/NeurIPS/ICML)
+  python main.py --skip-cvf            # skip CVF open-access (CVPR/ICCV/ECCV)
   python main.py --s2-key <key>        # use an S2 API key for higher limits
 """
 from __future__ import annotations
@@ -47,26 +48,11 @@ def parse_args() -> argparse.Namespace:
         default="output",
         help="Directory where markdown reports are written.",
     )
-    p.add_argument(
-        "--skip-hf",
-        action="store_true",
-        help="Skip the HuggingFace scraper.",
-    )
-    p.add_argument(
-        "--skip-s2",
-        action="store_true",
-        help="Skip the Semantic Scholar scraper.",
-    )
-    p.add_argument(
-        "--skip-arxiv",
-        action="store_true",
-        help="Skip the arXiv scraper.",
-    )
-    p.add_argument(
-        "--skip-openreview",
-        action="store_true",
-        help="Skip the OpenReview scraper (ICLR / NeurIPS / ICML).",
-    )
+    p.add_argument("--skip-hf", action="store_true", help="Skip HuggingFace scraper.")
+    p.add_argument("--skip-s2", action="store_true", help="Skip Semantic Scholar scraper.")
+    p.add_argument("--skip-arxiv", action="store_true", help="Skip arXiv scraper.")
+    p.add_argument("--skip-openreview", action="store_true", help="Skip OpenReview (ICLR/NeurIPS/ICML).")
+    p.add_argument("--skip-cvf", action="store_true", help="Skip CVF open-access (CVPR/ICCV/ECCV).")
     p.add_argument(
         "--s2-key",
         default=os.environ.get("SS_API_KEY", ""),
@@ -102,7 +88,7 @@ def main() -> int:
 
     # ---- Semantic Scholar --------------------------------------------------
     if not args.skip_s2:
-        logger.info("=== Semantic Scholar (conference papers) ===")
+        logger.info("=== Semantic Scholar (AAAI / NeurIPS / ICML / ICLR / CVPR / KDD) ===")
         from src.scrapers.semantic_scholar import SemanticScholarScraper
         ss_papers = SemanticScholarScraper(api_key=args.s2_key or None).fetch()
         logger.info("  collected %d papers", len(ss_papers))
@@ -118,7 +104,7 @@ def main() -> int:
         all_papers.extend(arxiv_papers)
         source_counts["arxiv"] += len(arxiv_papers)
 
-    # ---- OpenReview --------------------------------------------------------
+    # ---- OpenReview (ICLR / NeurIPS / ICML) --------------------------------
     if not args.skip_openreview:
         logger.info("=== OpenReview (ICLR / NeurIPS / ICML) ===")
         from src.scrapers.openreview import OpenReviewScraper
@@ -126,6 +112,15 @@ def main() -> int:
         logger.info("  collected %d papers", len(or_papers))
         all_papers.extend(or_papers)
         source_counts["openreview"] += len(or_papers)
+
+    # ---- CVF open-access (CVPR / ICCV / ECCV) ------------------------------
+    if not args.skip_cvf:
+        logger.info("=== CVF Open Access (CVPR / ICCV / ECCV) ===")
+        from src.scrapers.cvf import CVFScraper
+        cvf_papers = CVFScraper().fetch()
+        logger.info("  collected %d papers", len(cvf_papers))
+        all_papers.extend(cvf_papers)
+        source_counts["cvf"] += len(cvf_papers)
 
     if not all_papers:
         logger.warning("No papers collected — check network access and try again.")
@@ -154,20 +149,21 @@ def main() -> int:
     print(f"  Daily Paper Digest  {target_date}")
     print(f"{'='*60}")
 
-    print(f"\n  {'Source':<25} {'Raw':>5}")
-    print(f"  {'-'*35}")
+    print(f"\n  {'Source':<30} {'Raw':>5}")
+    print(f"  {'-'*40}")
     source_label = {
-        "huggingface":        "HuggingFace (daily)",
-        "huggingface_search": "HuggingFace (search)",
+        "huggingface":        "HuggingFace (daily featured)",
+        "huggingface_search": "HuggingFace (topic search)",
         "openreview":         "OpenReview (ICLR/NeurIPS/ICML)",
         "semantic_scholar":   "Semantic Scholar",
         "arxiv":              "arXiv",
+        "cvf":                "CVF (CVPR/ICCV/ECCV)",
     }
     for src, cnt in sorted(source_counts.items(), key=lambda x: -x[1]):
         label = source_label.get(src, src)
-        print(f"  {label:<25} {cnt:>5}")
-    print(f"  {'─'*35}")
-    print(f"  {'Total raw':<25} {len(all_papers):>5}")
+        print(f"  {label:<30} {cnt:>5}")
+    print(f"  {'─'*40}")
+    print(f"  {'Total raw':<30} {len(all_papers):>5}")
 
     print(f"\n  {'Topic':<15} {'Papers':>7}")
     print(f"  {'-'*25}")

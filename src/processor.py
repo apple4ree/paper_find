@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional
 
-from .config import CONFERENCES, TOPICS
+from .config import CONFERENCES, MIN_YEAR, TOPICS
 from .models import Paper
 
 logger = logging.getLogger(__name__)
@@ -30,12 +30,17 @@ class PaperProcessor:
         deduped = _deduplicate(papers)
         logger.info("Dedup: %d → %d papers", len(papers), len(deduped))
 
-        # 2. Try to infer conference from title/abstract when not already set
+        # 2. Drop papers that are too old to be relevant
+        before = len(deduped)
+        deduped = [p for p in deduped if _is_recent(p)]
+        logger.info("Year filter (>= %d): %d → %d papers", MIN_YEAR, before, len(deduped))
+
+        # 3. Try to infer conference from title/abstract when not already set
         for p in deduped:
             if not p.conference:
                 p.conference = _detect_conference(p)
 
-        # 3. Assign topic labels
+        # 4. Assign topic labels
         categorized: Dict[str, List[Paper]] = {topic: [] for topic in TOPICS}
         for p in deduped:
             matched = _match_topics(p)
@@ -44,7 +49,7 @@ class PaperProcessor:
                 for topic in matched:
                     categorized[topic].append(p)
 
-        # 4. Sort each bucket: HuggingFace featured first, then newest first
+        # 5. Sort each bucket: HuggingFace featured first, then newest first
         for topic in categorized:
             categorized[topic].sort(
                 key=lambda p: (
@@ -85,6 +90,18 @@ def _deduplicate(papers: List[Paper]) -> List[Paper]:
             if _SOURCE_PRIORITY.get(p.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
                 existing.source = p.source
     return list(seen.values())
+
+
+def _is_recent(paper: Paper) -> bool:
+    """Return True if the paper is recent enough to include."""
+    if paper.year and paper.year >= MIN_YEAR:
+        return True
+    if paper.published_date and paper.published_date.year >= MIN_YEAR:
+        return True
+    # If we have no date information at all, keep the paper (benefit of the doubt)
+    if not paper.year and not paper.published_date:
+        return True
+    return False
 
 
 def _detect_conference(paper: Paper) -> Optional[str]:

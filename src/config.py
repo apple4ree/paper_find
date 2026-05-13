@@ -198,3 +198,6 @@ SS_FIELDS = (
 
 # How far back (days) to look when querying Semantic Scholar / arXiv
 LOOKBACK_DAYS = 3
+
+# Minimum publication year — papers older than this are excluded from the digest
+MIN_YEAR = 2024

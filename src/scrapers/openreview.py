@@ -2,7 +2,12 @@
 OpenReview scraper for ICLR, NeurIPS, and ICML conference papers.
 
 Uses the OpenReview API v2 to search for accepted papers by topic keyword.
-Covers the current and previous year for each hosted venue.
+Only queries venues whose conference dates have already passed.
+
+Approximate conference calendars (used to decide which years to query):
+  ICLR   → May of that year
+  ICML   → July of that year
+  NeurIPS → December of that year
 
 API base: https://api2.openreview.net
 """
@@ -12,7 +17,7 @@ import logging
 import re
 import time
 from datetime import date, datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import requests
 
@@ -21,28 +26,41 @@ from ..models import Paper
 logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
-_DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
+_DELAY = 1.5    # seconds between requests
 _LIMIT = 25     # results per search call
 
-_CUR_YEAR = date.today().year
+_TODAY = date.today()
+_CUR_YEAR = _TODAY.year
+_CUR_MONTH = _TODAY.month
 
-# Map canonical conference name → list of OpenReview venue IDs to query.
-# We try current year and previous year so that freshly-accepted papers
-# (e.g. ICLR 2026 camera-ready) are captured alongside 2025 proceedings.
-VENUE_CONF: Dict[str, List[str]] = {
-    "ICLR": [
-        f"ICLR.cc/{_CUR_YEAR}/Conference",
-        f"ICLR.cc/{_CUR_YEAR - 1}/Conference",
-    ],
-    "NeurIPS": [
-        f"NeurIPS.cc/{_CUR_YEAR}/Conference",
-        f"NeurIPS.cc/{_CUR_YEAR - 1}/Conference",
-    ],
-    "ICML": [
-        f"ICML.cc/{_CUR_YEAR}/Conference",
-        f"ICML.cc/{_CUR_YEAR - 1}/Conference",
-    ],
-}
+
+def _past_years_for(conf: str) -> List[int]:
+    """Return the list of years whose proceedings are likely already published."""
+    # Approximate months when each conference concludes
+    conf_month = {"ICLR": 5, "ICML": 7, "NeurIPS": 12}
+    month = conf_month.get(conf, 12)
+
+    years = []
+    for y in (_CUR_YEAR, _CUR_YEAR - 1):
+        if y < _CUR_YEAR:
+            years.append(y)
+        elif y == _CUR_YEAR and _CUR_MONTH >= month:
+            years.append(y)
+    return years if years else [_CUR_YEAR - 1]
+
+
+# Build venue IDs for conferences whose proceedings already exist
+VENUE_CONF: Dict[str, List[str]] = {}
+for _conf, _tpl in {
+    "ICLR": "ICLR.cc/{year}/Conference",
+    "NeurIPS": "NeurIPS.cc/{year}/Conference",
+    "ICML": "ICML.cc/{year}/Conference",
+}.items():
+    _venues = [_tpl.format(year=y) for y in _past_years_for(_conf)]
+    if _venues:
+        VENUE_CONF[_conf] = _venues
+
+logger.debug("OpenReview venues to query: %s", VENUE_CONF)
 
 # Representative search terms per topic
 TOPIC_QUERIES: Dict[str, List[str]] = {
@@ -93,12 +111,6 @@ class OpenReviewScraper:
                     for query in queries:
                         try:
                             batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
                             for p in batch:
                                 pid = p.get_id()
                                 if pid not in seen:
@@ -153,10 +165,7 @@ class OpenReviewScraper:
 # ---------------------------------------------------------------------------
 
 def _field(content: dict, key: str) -> str:
-    """Extract string value from an OpenReview v2 content dict.
-
-    Field values may be plain strings or wrapped as {"value": "..."}.
-    """
+    """Extract string value from an OpenReview v2 content dict."""
     v = content.get(key, "")
     if isinstance(v, dict):
         return str(v.get("value") or "")
@@ -172,13 +181,11 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
 
     abstract = _field(content, "abstract").strip()
 
-    # Authors: plain list or {"value": [...]}
     raw_authors = content.get("authors") or []
     if isinstance(raw_authors, dict):
         raw_authors = raw_authors.get("value") or []
     authors = [str(a) for a in raw_authors if a]
 
-    # arXiv ID: check known fields and any URL-shaped value
     arxiv_id: Optional[str] = None
     for key in ("ARXIV", "arxiv", "_bibtex", "pdf", "code"):
         m = _ARXIV_ID_RE.search(_field(content, key))
@@ -191,7 +198,6 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
     if arxiv_id:
         url = f"https://arxiv.org/abs/{arxiv_id}"
 
-    # Creation timestamp is in milliseconds
     pub_date: Optional[date] = None
     for ts_key in ("cdate", "odate", "mdate"):
         cdate = item.get(ts_key)

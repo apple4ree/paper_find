@@ -4,6 +4,11 @@ Semantic Scholar scraper.
 Searches the S2 Paper Search API for each topic keyword, then filters
 results whose `venue` field matches one of our target conferences.
 
+Two search strategies are combined:
+  1. Generic topic queries  — broad coverage across all venues
+  2. Conference-boosted queries — "<topic> <conference>" to surface papers
+     from AAAI, CVPR, and KDD that are under-represented in OpenReview
+
 API endpoint: https://api.semanticscholar.org/graph/v1/paper/search
 Rate limits (without key):  ~100 requests / 5 min
 Rate limits (with key):     ~1 000 requests / 5 min
@@ -24,11 +29,10 @@ logger = logging.getLogger(__name__)
 
 SS_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 
-# Delay between S2 requests (seconds): 1.5s without key, 0.5s with key
 _DELAY_NO_KEY = 1.5
 _DELAY_WITH_KEY = 0.5
 
-# Representative search terms per topic — broad enough to catch most papers
+# Generic topic search terms
 TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     "Agent": [
         "llm agent",
@@ -65,6 +69,40 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
     ],
 }
 
+# Conference-boosted queries to improve AAAI / CVPR / KDD coverage.
+# These pair a topic keyword with a venue name so S2 ranks venue-matching
+# papers higher in its BM25 results — we still filter by venue field.
+CONF_BOOSTED_TERMS: Dict[str, List[str]] = {
+    "Agent": [
+        "agent AAAI",
+        "multi-agent AAAI",
+        "autonomous agent CVPR",
+        "vision language model agent CVPR",
+        "visual agent CVPR",
+        "embodied agent CVPR",
+        "agent KDD",
+        "reinforcement learning agent AAAI",
+        "planning agent AAAI",
+    ],
+    "Harness": [
+        "evaluation benchmark AAAI",
+        "llm evaluation CVPR",
+        "vision benchmark CVPR",
+        "model evaluation KDD",
+        "benchmark AAAI",
+    ],
+    "Finance": [
+        "fraud detection AAAI",
+        "credit risk AAAI",
+        "financial prediction KDD",
+        "fraud KDD",
+        "stock prediction KDD",
+        "risk management KDD",
+        "financial graph KDD",
+        "anomaly detection finance KDD",
+    ],
+}
+
 
 class SemanticScholarScraper:
     def __init__(
@@ -80,8 +118,6 @@ class SemanticScholarScraper:
         self._delay = _DELAY_WITH_KEY if self._has_key else _DELAY_NO_KEY
 
     # ------------------------------------------------------------------
-    # Public interface
-    # ------------------------------------------------------------------
 
     def fetch(self) -> List[Paper]:
         """Return recent conference papers matching our topic keywords."""
@@ -89,7 +125,14 @@ class SemanticScholarScraper:
         current_year = date.today().year
         year_range = f"{current_year - 1}-{current_year}"
 
-        for topic, terms in TOPIC_SEARCH_TERMS.items():
+        all_terms: Dict[str, List[str]] = {}
+        for topic in TOPIC_SEARCH_TERMS:
+            all_terms[topic] = (
+                TOPIC_SEARCH_TERMS[topic]
+                + CONF_BOOSTED_TERMS.get(topic, [])
+            )
+
+        for topic, terms in all_terms.items():
             for term in terms:
                 try:
                     results = self._search(term, year_range)
@@ -119,14 +162,11 @@ class SemanticScholarScraper:
                         logger.error("S2 HTTP error [%s / %s]: %s", topic, term, exc)
                 except Exception as exc:
                     logger.error("S2 error [%s / %s]: %s", topic, term, exc)
-                # Polite delay to stay within rate limits
                 time.sleep(self._delay)
 
         logger.info("Semantic Scholar: %d unique papers collected", len(seen))
         return list(seen.values())
 
-    # ------------------------------------------------------------------
-    # Internal helpers
     # ------------------------------------------------------------------
 
     def _search(self, query: str, year_range: str, limit: int = 100) -> List[Paper]:
@@ -152,16 +192,14 @@ class SemanticScholarScraper:
         if not title:
             return None
 
-        # Conference matching: check venue field against known aliases
         venue = (item.get("venue") or "").strip()
         matched_conf = _match_conference(venue)
         if not matched_conf:
-            return None  # Skip papers not from our target conferences
+            return None
 
         ext_ids = item.get("externalIds") or {}
         arxiv_id = ext_ids.get("ArXiv") or None
 
-        # Prefer ArXiv URL, then openAccessPdf, then S2 page
         url = ""
         if arxiv_id:
             url = f"https://arxiv.org/abs/{arxiv_id}"
@@ -197,8 +235,6 @@ class SemanticScholarScraper:
         )
 
 
-# ---------------------------------------------------------------------------
-# Helpers
 # ---------------------------------------------------------------------------
 
 def _match_conference(venue: str) -> Optional[str]:
