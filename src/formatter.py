@@ -8,8 +8,11 @@ from typing import Dict, List
 
 from .models import Paper
 
+# The 6 required conferences — always shown first, in this order
+_REQUIRED_CONFS = ["AAAI", "NeurIPS", "ICML", "ICLR", "CVPR", "KDD"]
+
 # Conference display order within each topic section
-_CONF_ORDER = ["AAAI", "NeurIPS", "ICML", "ICLR", "CVPR", "KDD"]
+_CONF_ORDER = _REQUIRED_CONFS + ["ACL", "EMNLP", "NAACL", "IJCAI"]
 
 _SOURCE_BADGE = {
     "huggingface":        "HuggingFace Featured",
@@ -17,6 +20,15 @@ _SOURCE_BADGE = {
     "openreview":         "OpenReview",
     "arxiv":              "arXiv",
     "semantic_scholar":   "Semantic Scholar",
+}
+
+_CONF_SOURCE = {
+    "AAAI":    "OpenReview · Semantic Scholar · arXiv",
+    "NeurIPS": "OpenReview · Semantic Scholar · arXiv",
+    "ICML":    "OpenReview · Semantic Scholar · arXiv",
+    "ICLR":    "OpenReview · Semantic Scholar · arXiv",
+    "CVPR":    "Semantic Scholar · arXiv",
+    "KDD":     "Semantic Scholar · arXiv",
 }
 
 
@@ -33,16 +45,39 @@ class PaperFormatter:
         unique_count = len(unique_papers)
         total_entries = sum(len(v) for v in categorized.values())
 
+        # Build per-conference paper count for the summary table
+        conf_counts: Dict[str, int] = {}
+        for plist in categorized.values():
+            for p in plist:
+                if p.conference:
+                    conf_counts[p.conference] = conf_counts.get(p.conference, 0) + 1
+
+        conf_row = " · ".join(
+            f"**{c}** ({conf_counts.get(c, 0)})" for c in _REQUIRED_CONFS
+        )
+
         lines += [
             f"# Daily Paper Digest — {target_date.strftime('%Y-%m-%d (%A)')}",
             "",
-            "| Source | Topics |",
-            "|--------|--------|",
-            "| AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview | Agent · Harness · Finance |",
+            "## Coverage",
+            "",
+            f"| {'Conference':<10} | Source |",
+            f"|{'-'*12}|{'-'*42}|",
+        ]
+        for conf in _REQUIRED_CONFS:
+            src = _CONF_SOURCE.get(conf, "Semantic Scholar · arXiv")
+            lines.append(f"| **{conf}** | {src} |")
+        lines += [
+            "| ACL · EMNLP · NAACL · IJCAI | Semantic Scholar · arXiv |",
+            "| HuggingFace | Daily Papers + Topic Search |",
+            "",
+            f"**Topics:** Agent · Harness · Finance",
+            "",
+            conf_row,
             "",
             (
                 f"**{unique_count} unique papers** "
-                f"({total_entries} topic-entries — cross-topic papers counted once per category)"
+                f"({total_entries} topic-entries — a paper can appear in multiple topic sections)"
             ),
             "",
             "---",

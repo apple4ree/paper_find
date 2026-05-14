@@ -1,8 +1,13 @@
 """
-OpenReview scraper for ICLR, NeurIPS, and ICML conference papers.
+OpenReview scraper for AAAI, ICLR, NeurIPS, and ICML conference papers.
 
-Uses the OpenReview API v2 to search for accepted papers by topic keyword.
-Covers the current and previous year for each hosted venue.
+Strategy:
+  - Search OpenReview /notes/search by topic keyword (no venue filter in the API
+    call, since the `content.venueid` query parameter is unreliable and causes
+    inconsistent results across runs).
+  - Filter results in Python by checking each note's `content.venueid` field
+    against known venue-ID prefixes per conference.
+  - This covers AAAI 2024/2025 (which moved to OpenReview), ICLR, NeurIPS, ICML.
 
 API base: https://api2.openreview.net
 """
@@ -21,30 +26,42 @@ from ..models import Paper
 logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
-_DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
-_LIMIT = 25     # results per search call
+_DELAY = 1.5     # seconds between requests (be polite)
+_LIMIT = 50      # results per search call
 
 _CUR_YEAR = date.today().year
 
-# Map canonical conference name → list of OpenReview venue IDs to query.
-# We try current year and previous year so that freshly-accepted papers
-# (e.g. ICLR 2026 camera-ready) are captured alongside 2025 proceedings.
-VENUE_CONF: Dict[str, List[str]] = {
+# Venue-ID prefixes per canonical conference name.
+# Accepted papers at each conference have a content.venueid that *starts with*
+# one of these prefixes.  We check both current and previous year.
+_VENUE_PREFIXES: Dict[str, List[str]] = {
+    "AAAI": [
+        f"AAAI.org/{_CUR_YEAR}/",
+        f"AAAI.org/{_CUR_YEAR - 1}/",
+    ],
     "ICLR": [
-        f"ICLR.cc/{_CUR_YEAR}/Conference",
-        f"ICLR.cc/{_CUR_YEAR - 1}/Conference",
+        f"ICLR.cc/{_CUR_YEAR}/",
+        f"ICLR.cc/{_CUR_YEAR - 1}/",
     ],
     "NeurIPS": [
-        f"NeurIPS.cc/{_CUR_YEAR}/Conference",
-        f"NeurIPS.cc/{_CUR_YEAR - 1}/Conference",
+        f"NeurIPS.cc/{_CUR_YEAR}/",
+        f"NeurIPS.cc/{_CUR_YEAR - 1}/",
     ],
     "ICML": [
-        f"ICML.cc/{_CUR_YEAR}/Conference",
-        f"ICML.cc/{_CUR_YEAR - 1}/Conference",
+        f"ICML.cc/{_CUR_YEAR}/",
+        f"ICML.cc/{_CUR_YEAR - 1}/",
     ],
 }
 
-# Representative search terms per topic
+# Human-readable venue substrings used as fallback when venueid is absent
+_VENUE_TEXT: Dict[str, List[str]] = {
+    "AAAI":    ["aaai"],
+    "ICLR":    ["iclr"],
+    "NeurIPS": ["neurips", "nips"],
+    "ICML":    ["icml"],
+}
+
+# Topic search terms sent to the OpenReview full-text search endpoint
 TOPIC_QUERIES: Dict[str, List[str]] = {
     "Agent": [
         "llm agent",
@@ -52,20 +69,26 @@ TOPIC_QUERIES: Dict[str, List[str]] = {
         "multi-agent",
         "agentic",
         "tool use",
+        "language agent",
+        "gui agent",
+        "web agent",
     ],
     "Harness": [
         "evaluation harness",
         "lm eval",
         "llm evaluation",
-        "benchmark",
+        "llm benchmark",
         "evaluation framework",
+        "benchmark suite",
     ],
     "Finance": [
-        "financial",
-        "trading",
-        "portfolio",
+        "financial language model",
+        "stock market",
+        "portfolio optimization",
+        "algorithmic trading",
         "fraud detection",
         "cryptocurrency",
+        "financial forecasting",
     ],
 }
 
@@ -81,60 +104,42 @@ class OpenReviewScraper:
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
 
     def fetch(self) -> List[Paper]:
-        """Return ICLR/NeurIPS/ICML papers matching Agent/Harness/Finance keywords."""
+        """Return AAAI/ICLR/NeurIPS/ICML papers matching Agent/Harness/Finance."""
         seen: Dict[str, Paper] = {}
 
-        for conf_name, venue_ids in VENUE_CONF.items():
-            for venue_id in venue_ids:
-                year_m = _YEAR_RE.search(venue_id)
-                year = int(year_m.group(1)) if year_m else None
-
-                for topic, queries in TOPIC_QUERIES.items():
-                    for query in queries:
-                        try:
-                            batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
-                            for p in batch:
-                                pid = p.get_id()
-                                if pid not in seen:
-                                    seen[pid] = p
-                            if batch:
-                                logger.debug(
-                                    "OpenReview [%s %s / '%s']: %d",
-                                    conf_name, year or "?", query, len(batch),
-                                )
-                        except Exception as exc:
-                            logger.warning(
-                                "OpenReview [%s %s / '%s']: %s",
-                                conf_name, year or "?", query, exc,
-                            )
-                        time.sleep(_DELAY)
+        for topic, queries in TOPIC_QUERIES.items():
+            for query in queries:
+                try:
+                    batch = self._search_keyword(query)
+                    before = len(seen)
+                    for p in batch:
+                        pid = p.get_id()
+                        if pid not in seen:
+                            seen[pid] = p
+                    gained = len(seen) - before
+                    if gained:
+                        logger.debug(
+                            "OpenReview ['%s']: %d results, +%d new (total %d)",
+                            query, len(batch), gained, len(seen),
+                        )
+                except Exception as exc:
+                    logger.warning(
+                        "OpenReview [%s / '%s']: %s", topic, query, exc
+                    )
+                time.sleep(_DELAY)
 
         logger.info("OpenReview: %d unique papers collected", len(seen))
         return list(seen.values())
 
     # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
 
-    def _search(
-        self,
-        query: str,
-        venue_id: str,
-        conf_name: str,
-        year: Optional[int],
-    ) -> List[Paper]:
+    def _search_keyword(self, query: str) -> List[Paper]:
+        """Full-text search; filter results by target-conference venue IDs."""
         resp = self.session.get(
             f"{_API}/notes/search",
-            params={
-                "term": query,
-                "content.venueid": venue_id,
-                "offset": 0,
-                "limit": _LIMIT,
-            },
+            params={"term": query, "limit": _LIMIT, "offset": 0},
             timeout=30,
         )
         resp.raise_for_status()
@@ -142,10 +147,47 @@ class OpenReviewScraper:
 
         papers: List[Paper] = []
         for item in data.get("notes") or []:
-            p = _parse_note(item, conf_name, year)
+            content = item.get("content") or {}
+            venueid = _field(content, "venueid")
+            conf = _match_by_venueid(venueid)
+            if not conf:
+                # Fallback: check the human-readable venue string
+                conf = _match_by_venue_text(_field(content, "venue"))
+            if not conf:
+                continue
+
+            year_m = _YEAR_RE.search(venueid or _field(content, "venue"))
+            year = int(year_m.group(1)) if year_m else None
+            p = _parse_note(item, conf, year)
             if p:
                 papers.append(p)
+
         return papers
+
+
+# ---------------------------------------------------------------------------
+# Venue matching helpers
+# ---------------------------------------------------------------------------
+
+def _match_by_venueid(venueid: str) -> Optional[str]:
+    """Return canonical conference name if venueid starts with a known prefix."""
+    if not venueid:
+        return None
+    for conf, prefixes in _VENUE_PREFIXES.items():
+        if any(venueid.startswith(p) for p in prefixes):
+            return conf
+    return None
+
+
+def _match_by_venue_text(venue: str) -> Optional[str]:
+    """Fallback: match human-readable venue field by substring."""
+    if not venue:
+        return None
+    v = venue.lower()
+    for conf, substrings in _VENUE_TEXT.items():
+        if any(s in v for s in substrings):
+            return conf
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -172,13 +214,11 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
 
     abstract = _field(content, "abstract").strip()
 
-    # Authors: plain list or {"value": [...]}
     raw_authors = content.get("authors") or []
     if isinstance(raw_authors, dict):
         raw_authors = raw_authors.get("value") or []
     authors = [str(a) for a in raw_authors if a]
 
-    # arXiv ID: check known fields and any URL-shaped value
     arxiv_id: Optional[str] = None
     for key in ("ARXIV", "arxiv", "_bibtex", "pdf", "code"):
         m = _ARXIV_ID_RE.search(_field(content, key))
@@ -191,7 +231,6 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
     if arxiv_id:
         url = f"https://arxiv.org/abs/{arxiv_id}"
 
-    # Creation timestamp is in milliseconds
     pub_date: Optional[date] = None
     for ts_key in ("cdate", "odate", "mdate"):
         cdate = item.get(ts_key)

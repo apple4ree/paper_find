@@ -42,6 +42,7 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "agentic",
         "tool use",
         "autonomous agent",
+        "language agent",
     ],
     "Harness": [
         "harness",
@@ -66,6 +67,27 @@ TOPIC_CATEGORIES: Dict[str, List[str]] = {
     "Agent": ["cs.AI", "cs.LG", "cs.CL", "cs.MA"],
     "Harness": ["cs.AI", "cs.LG", "cs.CL"],
     "Finance": ["cs.AI", "cs.LG", "q-fin.TR", "q-fin.PM", "q-fin.RM", "q-fin.ST", "q-fin.CP"],
+}
+
+# Explicit conference-mention searches: for CVPR/KDD that are NOT on OpenReview,
+# we search arXiv papers that directly mention the conference in title/abstract.
+# These run in addition to the topic searches above.
+CONFERENCE_MENTION_SEARCHES: Dict[str, Dict[str, object]] = {
+    "CVPR": {
+        "keywords": ["CVPR", "Computer Vision and Pattern Recognition"],
+        "categories": ["cs.CV", "cs.AI", "cs.LG"],
+        "topics": ["Agent", "Harness", "Finance"],  # still topic-filtered in processor
+    },
+    "KDD": {
+        "keywords": ["KDD", "Knowledge Discovery and Data Mining", "SIGKDD"],
+        "categories": ["cs.LG", "cs.AI", "cs.IR"],
+        "topics": ["Agent", "Harness", "Finance"],
+    },
+    "AAAI": {
+        "keywords": ["AAAI"],
+        "categories": ["cs.AI", "cs.LG", "cs.CL"],
+        "topics": ["Agent", "Harness", "Finance"],
+    },
 }
 
 
@@ -101,6 +123,7 @@ class ArxivScraper:
 
         seen: Dict[str, Paper] = {}
 
+        # --- 1. Topic × category searches ---
         for topic, terms in TOPIC_SEARCH_TERMS.items():
             categories = TOPIC_CATEGORIES[topic]
             for term in terms:
@@ -121,7 +144,36 @@ class ArxivScraper:
                         logger.error(
                             "ArXiv error [%s / %s / %s]: %s", topic, term, cat, exc
                         )
-                    # Respect arXiv's recommended 3-second delay
+                    time.sleep(ARXIV_DELAY)
+
+        # --- 2. Explicit conference-mention searches (CVPR, KDD, AAAI) ---
+        for conf_name, spec in CONFERENCE_MENTION_SEARCHES.items():
+            for keyword in spec["keywords"]:  # type: ignore[index]
+                for cat in spec["categories"]:  # type: ignore[index]
+                    try:
+                        results = self._search(
+                            keyword, cat, start_date, end_date,
+                            max_results=MAX_RESULTS_PER_QUERY,
+                        )
+                        added = 0
+                        for p in results:
+                            pid = p.get_id()
+                            if pid not in seen:
+                                # Tag with conference if not already set
+                                if not p.conference:
+                                    p.conference = conf_name
+                                seen[pid] = p
+                                added += 1
+                        if added:
+                            logger.debug(
+                                "ArXiv [conf=%s / '%s' / %s]: +%d",
+                                conf_name, keyword, cat, added,
+                            )
+                    except Exception as exc:
+                        logger.error(
+                            "ArXiv conf-search error [%s / %s / %s]: %s",
+                            conf_name, keyword, cat, exc,
+                        )
                     time.sleep(ARXIV_DELAY)
 
         logger.info("ArXiv: %d unique papers collected", len(seen))

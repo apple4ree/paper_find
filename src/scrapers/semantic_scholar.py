@@ -4,6 +4,9 @@ Semantic Scholar scraper.
 Searches the S2 Paper Search API for each topic keyword, then filters
 results whose `venue` field matches one of our target conferences.
 
+Also runs dedicated conference × topic queries (e.g. "CVPR agent") to
+improve coverage for conferences that are NOT on OpenReview (CVPR, KDD, AAAI).
+
 API endpoint: https://api.semanticscholar.org/graph/v1/paper/search
 Rate limits (without key):  ~100 requests / 5 min
 Rate limits (with key):     ~1 000 requests / 5 min
@@ -41,6 +44,7 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "gui agent",
         "web agent",
         "code agent",
+        "embodied agent",
     ],
     "Harness": [
         "evaluation harness",
@@ -50,6 +54,7 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "language model benchmark",
         "llm evaluation",
         "capability evaluation",
+        "model assessment",
     ],
     "Finance": [
         "financial large language model",
@@ -62,6 +67,34 @@ TOPIC_SEARCH_TERMS: Dict[str, List[str]] = {
         "financial sentiment analysis",
         "market microstructure",
         "fintech deep learning",
+        "financial forecasting",
+        "risk management deep learning",
+    ],
+}
+
+# Dedicated conference × topic compound queries.
+# These specifically target conferences NOT on OpenReview (CVPR, KDD)
+# and supplement AAAI coverage beyond what OpenReview provides.
+CONFERENCE_TOPIC_QUERIES: Dict[str, List[str]] = {
+    "CVPR": [
+        "CVPR agent",
+        "CVPR multimodal agent",
+        "CVPR embodied",
+        "CVPR evaluation benchmark",
+        "computer vision agent",
+    ],
+    "KDD": [
+        "KDD agent",
+        "KDD financial",
+        "KDD fraud detection",
+        "KDD trading",
+        "KDD large language model",
+    ],
+    "AAAI": [
+        "AAAI agent",
+        "AAAI multi-agent",
+        "AAAI financial",
+        "AAAI evaluation",
     ],
 }
 
@@ -89,38 +122,15 @@ class SemanticScholarScraper:
         current_year = date.today().year
         year_range = f"{current_year - 1}-{current_year}"
 
+        # --- 1. Generic topic searches (all conferences) ---
         for topic, terms in TOPIC_SEARCH_TERMS.items():
             for term in terms:
-                try:
-                    results = self._search(term, year_range)
-                    new_count = 0
-                    for p in results:
-                        pid = p.get_id()
-                        if pid not in seen:
-                            seen[pid] = p
-                            new_count += 1
-                    logger.debug(
-                        "S2 [%s / %s]: %d results (%d new)",
-                        topic, term, len(results), new_count,
-                    )
-                except requests.exceptions.HTTPError as exc:
-                    if exc.response is not None and exc.response.status_code == 429:
-                        logger.warning("S2 rate limited; sleeping 30s then retrying")
-                        time.sleep(30)
-                        try:
-                            results = self._search(term, year_range)
-                            for p in results:
-                                pid = p.get_id()
-                                if pid not in seen:
-                                    seen[pid] = p
-                        except Exception as retry_exc:
-                            logger.error("S2 retry failed [%s / %s]: %s", topic, term, retry_exc)
-                    else:
-                        logger.error("S2 HTTP error [%s / %s]: %s", topic, term, exc)
-                except Exception as exc:
-                    logger.error("S2 error [%s / %s]: %s", topic, term, exc)
-                # Polite delay to stay within rate limits
-                time.sleep(self._delay)
+                self._run_query(term, year_range, seen, label=f"topic/{topic}")
+
+        # --- 2. Conference-specific compound queries (CVPR, KDD, AAAI) ---
+        for conf, queries in CONFERENCE_TOPIC_QUERIES.items():
+            for query in queries:
+                self._run_query(query, year_range, seen, label=f"conf/{conf}")
 
         logger.info("Semantic Scholar: %d unique papers collected", len(seen))
         return list(seen.values())
@@ -128,6 +138,46 @@ class SemanticScholarScraper:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+
+    def _run_query(
+        self,
+        term: str,
+        year_range: str,
+        seen: Dict[str, Paper],
+        label: str = "",
+    ) -> None:
+        """Execute one S2 search query with retry on rate-limit."""
+        for attempt in (1, 2):
+            try:
+                results = self._search(term, year_range)
+                new_count = 0
+                for p in results:
+                    pid = p.get_id()
+                    if pid not in seen:
+                        seen[pid] = p
+                        new_count += 1
+                logger.debug(
+                    "S2 [%s / '%s']: %d results (%d new)",
+                    label, term, len(results), new_count,
+                )
+                break  # success
+            except requests.exceptions.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code == 429:
+                    wait = 30 * attempt
+                    logger.warning(
+                        "S2 rate-limited on '%s'; sleeping %ds (attempt %d)",
+                        term, wait, attempt,
+                    )
+                    time.sleep(wait)
+                    if attempt == 2:
+                        logger.error("S2 retry failed [%s / '%s']", label, term)
+                else:
+                    logger.error("S2 HTTP error [%s / '%s']: %s", label, term, exc)
+                    break
+            except Exception as exc:
+                logger.error("S2 error [%s / '%s']: %s", label, term, exc)
+                break
+        time.sleep(self._delay)
 
     def _search(self, query: str, year_range: str, limit: int = 100) -> List[Paper]:
         params = {
@@ -152,7 +202,6 @@ class SemanticScholarScraper:
         if not title:
             return None
 
-        # Conference matching: check venue field against known aliases
         venue = (item.get("venue") or "").strip()
         matched_conf = _match_conference(venue)
         if not matched_conf:
@@ -161,7 +210,6 @@ class SemanticScholarScraper:
         ext_ids = item.get("externalIds") or {}
         arxiv_id = ext_ids.get("ArXiv") or None
 
-        # Prefer ArXiv URL, then openAccessPdf, then S2 page
         url = ""
         if arxiv_id:
             url = f"https://arxiv.org/abs/{arxiv_id}"
