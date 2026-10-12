@@ -6,6 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date
 from typing import List, Optional
+from .identity import aliases
 
 
 @dataclass
@@ -21,6 +22,9 @@ class Paper:
     source: str = ""
     topics: List[str] = field(default_factory=list)
     published_date: Optional[date] = None
+    # record_created is deliberately not evidence of first publication.
+    date_kind: str = "publication"
+    sources: List[str] = field(default_factory=list)
 
     def get_id(self) -> str:
         """Stable key used for deduplication.
@@ -28,10 +32,9 @@ class Paper:
         Prefer arXiv ID because the same paper may appear across all three
         sources.  Fall back to a normalised title string.
         """
-        if self.arxiv_id:
-            # Strip version suffix (e.g. "2310.12345v2" → "2310.12345")
-            base = self.arxiv_id.split("v")[0]
-            return f"arxiv:{base}"
-        # Normalise title: lowercase, collapse whitespace
-        normalized = " ".join(self.title.lower().split())
-        return f"title:{normalized}"
+        keys = aliases(vars(self))
+        for prefix in ("arxiv:", "doi:", "openreview:", "title:", "url:"):
+            matches = sorted(k for k in keys if k.startswith(prefix))
+            if matches:
+                return matches[0]
+        raise ValueError("Paper has no identity")
