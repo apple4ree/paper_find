@@ -11,38 +11,19 @@ from __future__ import annotations
 import logging
 import re
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Dict, List, Optional
 
 import requests
 
 from ..models import Paper
+from ..collection import CollectionStats, observed_query, response_records
 
 logger = logging.getLogger(__name__)
 
 _API = "https://api2.openreview.net"
 _DELAY = 1.5    # seconds between requests (OpenReview asks for politeness)
 _LIMIT = 25     # results per search call
-
-_CUR_YEAR = date.today().year
-
-# Map canonical conference name → list of OpenReview venue IDs to query.
-# We try current year and previous year so that freshly-accepted papers
-# (e.g. ICLR 2026 camera-ready) are captured alongside 2025 proceedings.
-VENUE_CONF: Dict[str, List[str]] = {
-    "ICLR": [
-        f"ICLR.cc/{_CUR_YEAR}/Conference",
-        f"ICLR.cc/{_CUR_YEAR - 1}/Conference",
-    ],
-    "NeurIPS": [
-        f"NeurIPS.cc/{_CUR_YEAR}/Conference",
-        f"NeurIPS.cc/{_CUR_YEAR - 1}/Conference",
-    ],
-    "ICML": [
-        f"ICML.cc/{_CUR_YEAR}/Conference",
-        f"ICML.cc/{_CUR_YEAR - 1}/Conference",
-    ],
-}
 
 # Representative search terms per topic
 TOPIC_QUERIES: Dict[str, List[str]] = {
@@ -77,14 +58,19 @@ class OpenReviewScraper:
     """Search OpenReview-hosted conference papers by topic keyword."""
 
     def __init__(self, session: Optional[requests.Session] = None):
+        self.stats = CollectionStats("openreview")
         self.session = session or requests.Session()
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
 
-    def fetch(self) -> List[Paper]:
+    def fetch(self, target_date: Optional[date] = None) -> List[Paper]:
         """Return ICLR/NeurIPS/ICML papers matching Agent/Harness/Finance keywords."""
         seen: Dict[str, Paper] = {}
 
-        for conf_name, venue_ids in VENUE_CONF.items():
+        current_year = (target_date or date.today()).year
+        venues = {conf: [f"{prefix}/{y}/Conference" for y in (current_year, current_year - 1)]
+                  for conf, prefix in (("ICLR", "ICLR.cc"), ("NeurIPS", "NeurIPS.cc"), ("ICML", "ICML.cc"))}
+        self.stats.context.update(venues=venues, search_mode="discovery")
+        for conf_name, venue_ids in venues.items():
             for venue_id in venue_ids:
                 year_m = _YEAR_RE.search(venue_id)
                 year = int(year_m.group(1)) if year_m else None
@@ -93,12 +79,6 @@ class OpenReviewScraper:
                     for query in queries:
                         try:
                             batch = self._search(query, venue_id, conf_name, year)
-                            new = sum(
-                                1 for p in batch
-                                if (pid := p.get_id()) not in seen
-                                or not seen.update({pid: p})  # type: ignore[func-returns-value]
-                            )
-                            # Simpler: just check before inserting
                             for p in batch:
                                 pid = p.get_id()
                                 if pid not in seen:
@@ -120,6 +100,7 @@ class OpenReviewScraper:
 
     # ------------------------------------------------------------------
 
+    @observed_query
     def _search(
         self,
         query: str,
@@ -139,6 +120,9 @@ class OpenReviewScraper:
         )
         resp.raise_for_status()
         data = resp.json()
+        if not isinstance(data, dict) or not isinstance(data.get("notes"), list):
+            raise ValueError("Expected OpenReview notes list")
+        response_records(self, len(data["notes"]), _LIMIT)
 
         papers: List[Paper] = []
         for item in data.get("notes") or []:
@@ -193,11 +177,11 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
 
     # Creation timestamp is in milliseconds
     pub_date: Optional[date] = None
-    for ts_key in ("cdate", "odate", "mdate"):
+    for ts_key in ("tcdate", "cdate"):
         cdate = item.get(ts_key)
         if cdate:
             try:
-                pub_date = datetime.fromtimestamp(int(cdate) / 1000).date()
+                pub_date = datetime.fromtimestamp(int(cdate) / 1000, timezone.utc).date()
                 break
             except (ValueError, TypeError, OSError):
                 pass
@@ -212,4 +196,5 @@ def _parse_note(item: dict, conf_name: str, year: Optional[int]) -> Optional[Pap
         year=year,
         source="openreview",
         published_date=pub_date,
+        date_kind="record_created",
     )

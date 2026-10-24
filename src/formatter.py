@@ -21,8 +21,9 @@ _SOURCE_BADGE = {
 
 
 class PaperFormatter:
-    def format(self, categorized: Dict[str, List[Paper]], target_date: date) -> str:
+    def format(self, categorized: Dict[str, List[Paper]], target_date: date, audit=None) -> str:
         lines: List[str] = []
+        metadata = {r["id"]: r for r in audit["papers"]} if audit else {}
 
         # Unique papers across all topics
         unique_papers = {
@@ -48,11 +49,14 @@ class PaperFormatter:
             "---",
             "",
         ]
+        if audit:
+            from .audit import audit_markdown
+            lines.append(audit_markdown(audit))
 
         if unique_count == 0:
             lines += [
                 "> No matching papers found today.",
-                "> Try running with `--lookback` set to a larger value.",
+                "> Check collection status and search windows above.",
                 "",
             ]
             lines += self._footer(target_date)
@@ -82,7 +86,7 @@ class PaperFormatter:
                 lines.append(f"### {conf}")
                 lines.append("")
                 for p in by_conf[conf]:
-                    lines += self._format_paper(p)
+                    lines += self._format_paper(p, metadata.get(p.get_id()))
                 lines.append("")
 
         lines += self._footer(target_date)
@@ -90,7 +94,7 @@ class PaperFormatter:
 
     # ------------------------------------------------------------------
 
-    def _format_paper(self, p: Paper) -> List[str]:
+    def _format_paper(self, p: Paper, metadata=None) -> List[str]:
         title_md = f"[{p.title}]({p.url})" if p.url else p.title
 
         # Author line (cap at 3 + "et al.")
@@ -113,7 +117,9 @@ class PaperFormatter:
         elif p.source == "openreview":
             meta.append("OpenReview")
         if p.published_date:
-            meta.append(f"`{p.published_date}`")
+            meta.append(f"`{p.published_date}`" + (" (record creation)" if p.date_kind == "record_created" else ""))
+        if metadata:
+            meta += [f"publication: {metadata['publication_class']}", f"first observed: {metadata['first_seen']}"]
 
         lines = [f"- **{title_md}**"]
         if authors_str:
