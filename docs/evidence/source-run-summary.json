@@ -1,0 +1,67 @@
+[
+  {
+    "report_date": "2026-10-09",
+    "job_id": 113897987959,
+    "run_id": 37953486165,
+    "evidence": [
+      "2026-10-09T15:40:39.8736403Z 15:40:39  INFO      HuggingFace daily: 50 papers",
+      "2026-10-09T15:40:51.2120390Z 15:40:51  INFO      HuggingFace search: 21 additional papers",
+      "2026-10-09T15:54:40.5017090Z 15:54:40  INFO      Semantic Scholar: 26 unique papers collected",
+      "2026-10-09T15:54:40.5255011Z 15:54:40  INFO      ArXiv: querying submissions from 2026-10-06 to 2026-10-09",
+      "2026-10-09T15:59:08.5435759Z 15:59:08  INFO      ArXiv: 461 unique papers collected",
+      "2026-10-09T16:01:35.9843011Z 16:01:35  INFO      OpenReview: 205 unique papers collected",
+      "2026-10-09T16:01:35.9855645Z 16:01:35  INFO      === Processing 763 raw papers ===",
+      "2026-10-09T16:01:35.9873830Z 16:01:35  INFO      Dedup: 763 → 742 papers",
+      "2026-10-09T16:01:36.0627446Z 16:01:36  INFO      Report written → output/2026-10-09.md  (647 unique papers)"
+    ],
+    "final_failed_queries": {
+      "semantic_scholar": 24,
+      "arxiv": 17,
+      "openreview": 34
+    }
+  },
+  {
+    "report_date": "2026-10-10",
+    "job_id": 114240633587,
+    "run_id": 38061538645,
+    "evidence": [
+      "2026-10-10T14:55:36.5402582Z 14:55:36  INFO      HuggingFace: no papers for 2026-10-10, using 2026-10-09 instead",
+      "2026-10-10T14:55:36.5402990Z 14:55:36  INFO      HuggingFace daily: 50 papers",
+      "2026-10-10T14:55:48.4738843Z 14:55:48  INFO      HuggingFace search: 24 additional papers",
+      "2026-10-10T15:08:40.1031375Z 15:08:40  INFO      Semantic Scholar: 103 unique papers collected",
+      "2026-10-10T15:08:40.1703851Z 15:08:40  INFO      ArXiv: querying submissions from 2026-10-09 to 2026-10-10",
+      "2026-10-10T15:13:12.1333336Z 15:13:12  INFO      ArXiv: 0 unique papers collected",
+      "2026-10-10T15:15:38.9664038Z 15:15:38  INFO      OpenReview: 205 unique papers collected",
+      "2026-10-10T15:15:38.9677051Z 15:15:38  INFO      === Processing 382 raw papers ===",
+      "2026-10-10T15:15:38.9690169Z 15:15:38  INFO      Dedup: 382 → 382 papers",
+      "2026-10-10T15:15:38.9922929Z 15:15:38  INFO      Report written → output/2026-10-10.md  (284 unique papers)"
+    ],
+    "final_failed_queries": {
+      "semantic_scholar": 21,
+      "arxiv": 0,
+      "openreview": 34
+    }
+  },
+  {
+    "report_date": "2026-10-11",
+    "job_id": 114502193402,
+    "run_id": 38150304144,
+    "evidence": [
+      "2026-10-11T15:12:33.4687009Z 15:12:33  INFO      HuggingFace: no papers for 2026-10-11, using 2026-10-09 instead",
+      "2026-10-11T15:12:33.4687295Z 15:12:33  INFO      HuggingFace daily: 50 papers",
+      "2026-10-11T15:12:45.6641031Z 15:12:45  INFO      HuggingFace search: 26 additional papers",
+      "2026-10-11T15:26:00.6265461Z 15:26:00  INFO      Semantic Scholar: 17 unique papers collected",
+      "2026-10-11T15:26:00.6428373Z 15:26:00  INFO      ArXiv: querying submissions from 2026-10-09 to 2026-10-11",
+      "2026-10-11T15:31:01.8553165Z 15:31:01  INFO      ArXiv: 0 unique papers collected",
+      "2026-10-11T15:33:30.1350906Z 15:33:30  INFO      OpenReview: 205 unique papers collected",
+      "2026-10-11T15:33:30.1360178Z 15:33:30  INFO      === Processing 298 raw papers ===",
+      "2026-10-11T15:33:30.1373508Z 15:33:30  INFO      Dedup: 298 → 298 papers",
+      "2026-10-11T15:33:30.1530186Z 15:33:30  INFO      Report written → output/2026-10-11.md  (224 unique papers)"
+    ],
+    "final_failed_queries": {
+      "semantic_scholar": 24,
+      "arxiv": 0,
+      "openreview": 34
+    }
+  }
+]

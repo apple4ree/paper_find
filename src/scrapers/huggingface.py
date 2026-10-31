@@ -21,6 +21,7 @@ import requests
 
 from ..config import TOPICS
 from ..models import Paper
+from ..collection import CollectionStats, observed_query, response_records
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ HF_TOPIC_QUERIES: dict[str, list[str]] = {
 
 class HuggingFaceScraper:
     def __init__(self, session: Optional[requests.Session] = None):
+        self.stats = CollectionStats("huggingface")
         self.session = session or requests.Session()
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
 
@@ -79,13 +81,19 @@ class HuggingFaceScraper:
         """Fetch today's curated papers, with fallback to recent days."""
         for offset in range(MAX_FALLBACK_DAYS + 1):
             d = target_date - timedelta(days=offset)
-            papers = self._fetch_date(d)
+            try:
+                papers = self._fetch_date(d)
+            except Exception as exc:
+                logger.error("HuggingFace daily fetch error (%s): %s", d, exc)
+                continue
             if papers:
                 if offset:
                     logger.info(
                         "HuggingFace: no papers for %s, using %s instead",
                         target_date, d,
                     )
+                self.stats.context["requested_date"] = str(target_date)
+                self.stats.context["effective_daily_date"] = str(d)
                 return papers
         logger.warning(
             "HuggingFace: no curated papers found in the last %d days",
@@ -93,16 +101,14 @@ class HuggingFaceScraper:
         )
         return []
 
+    @observed_query
     def _fetch_date(self, d: date) -> List[Paper]:
-        try:
-            resp = self.session.get(
-                HF_DAILY_API, params={"date": str(d)}, timeout=30
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as exc:
-            logger.error("HuggingFace daily fetch error (%s): %s", d, exc)
-            return []
+        resp = self.session.get(HF_DAILY_API, params={"date": str(d)}, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        if not isinstance(data, list):
+            raise ValueError("Expected HuggingFace daily list")
+        response_records(self, len(data))
 
         papers: List[Paper] = []
         for item in data:
@@ -137,27 +143,25 @@ class HuggingFaceScraper:
 
         return results
 
+    @observed_query
     def _search_query(self, query: str) -> List[Paper]:
         """Search HuggingFace papers by a single query string."""
-        try:
-            resp = self.session.get(
-                HF_SEARCH_API,
-                params={"q": query, "limit": SEARCH_LIMIT},
-                timeout=30,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as exc:
-            logger.error("HuggingFace search fetch error (%s): %s", query, exc)
-            return []
+        resp = self.session.get(HF_SEARCH_API, params={"q": query, "limit": SEARCH_LIMIT}, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
 
         # The response may be a list or a dict with a "papers" key
         if isinstance(data, list):
             items = data
         elif isinstance(data, dict):
+            if "papers" not in data and "data" not in data:
+                raise ValueError("Expected HuggingFace papers/data list")
             items = data.get("papers") or data.get("data") or []
         else:
-            return []
+            raise ValueError("Expected HuggingFace search list")
+        if not isinstance(items, list):
+            raise ValueError("Expected HuggingFace search list")
+        response_records(self, len(items), SEARCH_LIMIT)
 
         papers: List[Paper] = []
         for item in items:
@@ -198,7 +202,8 @@ class HuggingFaceScraper:
 
         pub_date: Optional[date] = None
         for key in ("publishedAt", "published_at", "publicationDate"):
-            raw = pd.get(key) or item.get(key)
+            # Outer publishedAt is the curation date, not paper publication.
+            raw = pd.get(key)
             if raw:
                 try:
                     pub_date = date.fromisoformat(str(raw)[:10])
