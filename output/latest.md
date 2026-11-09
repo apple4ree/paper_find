@@ -1,14 +1,30 @@
-# Daily Paper Digest — 2026-11-08 (Sunday)
+# Daily Paper Digest — 2026-11-09 (Monday)
 
 | Source | Topics |
 |--------|--------|
 | AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview | Agent · Harness · Finance |
 
-**243 unique papers** (319 topic-entries — cross-topic papers counted once per category)
+**249 unique papers** (328 topic-entries — cross-topic papers counted once per category)
+
+> ⚠️ **Network note (2026-11-09):** Direct API access to arXiv, HuggingFace, Semantic Scholar, and OpenReview was blocked by the network policy today. New papers below were found via web search; the full conference corpus mirrors yesterday's report.
 
 ---
 
-## Agent  (131)
+## Agent  (134)
+
+### arXiv / HuggingFace (new 2026-11-06)
+
+- **[DelegateEval: Evaluating Platforms for Personal External Service Agents](https://arxiv.org/abs/2611.07508)**
+  - *arXiv* · 🤗 · `2026-11-06`
+  - Personal AI agents are increasingly used to delegate tasks to external services. DelegateEval benchmarks the platforms and harnesses that mediate these delegations, measuring latency, reliability, and safety across 12 service types. The benchmark surfaces systematic gaps between agent capabilities and platform guarantees, motivating better harness standards for external service delegation.
+
+- **[More Agents, More Reliable? A Study of Multi-Agent Reliability under Failure Cascades](https://arxiv.org/abs/2611.07140)**
+  - *arXiv* · 🤗 · `2026-11-06`
+  - Scaling the number of agents in a multi-agent system does not trivially improve reliability; under certain topologies, failures cascade faster than the ensemble can compensate. We model the cascade dynamics in common communication patterns (star, ring, fully connected) and show that reliability peaks at intermediate agent counts, with both under-sized and over-sized ensembles prone to collapse, challenging the common assumption that "more agents" equals safer systems.
+
+- **[Autonomous AI Agents Systematically Diverge From Human Preferences in Proof Formalization](https://arxiv.org/abs/2611.06995)**
+  - *arXiv* · `2026-11-06`
+  - We identify a systematic gap between how autonomous LLM agents choose to formalize mathematical proofs and what human mathematicians prefer. Using a dataset of 400 theorem–proof pairs, we show that agents optimizing only task success converge on styles that are machine-efficient but human-unreadable. The divergence grows with proof length and disappears when human feedback is integrated into the agent's reward.
 
 ### AAAI
 
@@ -670,7 +686,26 @@ Furthermore…
   - 🤗 · `2026-11-04`
 
 
-## Harness  (76)
+## Harness  (80)
+
+### arXiv / HuggingFace (new 2026-11-01 to 2026-11-06)
+
+- **[The Harness Is the Model: Agent Scaffolding Changes a Fixed LLM's Compliance with Banking Conduct Rules, Unevenly Across Models](https://arxiv.org/abs/2611.06116)**
+  - *arXiv* · 🤗 · `2026-11-04`
+  - We test whether the surrounding agent harness changes a fixed LLM's compliance with banking conduct rules across six harness designs and three frontier models. Within a single model, the best and worst harness differ by 11.5 percentage points on compliance rate; across models, the effect is smaller but persistent. Date-arithmetic rules fail under every harness, suggesting a capability floor the harness cannot overcome. This positions harness engineering as a first-class compliance lever in regulated industries.
+
+- **[Beyond the Agent Harness: Boundary Criteria for Software-Factory Orchestration — A Single-Operator Case Study](https://arxiv.org/abs/2611.06946)**
+  - *arXiv* · `2026-11-05`
+  - As agentic AI systems grow beyond single harnesses into multi-harness software factories, the boundary between harness and application becomes blurry. We propose a principled set of criteria for where harness responsibilities end and application logic begins, grounded in a 14-month case study at a single software-development operator. The criteria cover context scope, failure semantics, and state ownership, and reduce integration bugs by 38% when applied retroactively.
+
+- **[Latent Harness: Compiling Agent Behaviors into Post-Block Activation Shifts](https://arxiv.org/abs/2611.01415)**
+  - *arXiv* · 🤗 · `2026-11-01`
+  - Instead of representing harness instructions as tokens, Latent Harness compiles them into residual-stream activation shifts injected after each transformer block. The compiled harness is invisible to context-window audits, runs at zero additional token cost, and achieves comparable performance to a 512-token system prompt across five agent benchmarks, raising both capability and safety questions about harness-as-activation designs.
+
+- **[DelegateEval: Evaluating Platforms for Personal External Service Agents](https://arxiv.org/abs/2611.07508)**
+  - *arXiv* · 🤗 · `2026-11-06`
+  - (see Agent section above — also harness-relevant)
+
 
 ### AAAI
 
@@ -1068,7 +1103,14 @@ Evaluating these routing systems is important yet inherently challenging due…
   - 🤗 Featured · `2026-11-03`
 
 
-## Finance  (112)
+## Finance  (113)
+
+### arXiv / HuggingFace (new 2026-11-04)
+
+- **[The Harness Is the Model: Agent Scaffolding Changes a Fixed LLM's Compliance with Banking Conduct Rules, Unevenly Across Models](https://arxiv.org/abs/2611.06116)**
+  - *arXiv* · 🤗 · `2026-11-04`
+  - (see Harness section above — banking conduct compliance study)
+
 
 ### AAAI
 
