@@ -19,6 +19,7 @@ import requests
 
 from ..config import CONFERENCES, LOOKBACK_DAYS, TOPICS
 from ..models import Paper
+from ..collection import CollectionStats, observed_query, response_records
 
 logger = logging.getLogger(__name__)
 
@@ -70,31 +71,26 @@ TOPIC_CATEGORIES: Dict[str, List[str]] = {
 
 
 def _arxiv_date_range(target_date: date) -> Tuple[date, date]:
-    """Return (start, end) dates for arXiv query, accounting for weekends.
+    """Keep a consistent inclusive lookback; Monday also includes Friday.
 
-    arXiv does not accept new submissions on Saturday/Sunday, so on Mondays
-    we look back to include the previous Friday's batch.
+    Previously Saturday narrowed the window to Friday alone, causing a
+    discontinuous drop even if every HTTP request succeeded.
     """
-    weekday = target_date.weekday()  # 0=Mon … 6=Sun
-    if weekday == 6:  # Sunday → look at Friday
-        start = target_date - timedelta(days=2)
-    elif weekday == 5:  # Saturday → look at Friday
-        start = target_date - timedelta(days=1)
-    elif weekday == 0:  # Monday → include Fri/Sat/Sun too
-        start = target_date - timedelta(days=3)
-    else:
-        start = target_date - timedelta(days=LOOKBACK_DAYS)
+    days_back = max(LOOKBACK_DAYS - 1, 3 if target_date.weekday() == 0 else 0)
+    start = target_date - timedelta(days=days_back)
     return start, target_date
 
 
 class ArxivScraper:
     def __init__(self, session: Optional[requests.Session] = None):
+        self.stats = CollectionStats("arxiv")
         self.session = session or requests.Session()
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
 
     def fetch(self, target_date: date) -> List[Paper]:
         """Return arXiv papers submitted around *target_date* that match topics."""
         start_date, end_date = _arxiv_date_range(target_date)
+        self.stats.context.update(start_date=str(start_date), end_date=str(end_date))
         logger.info(
             "ArXiv: querying submissions from %s to %s", start_date, end_date
         )
@@ -129,6 +125,7 @@ class ArxivScraper:
 
     # ------------------------------------------------------------------
 
+    @observed_query
     def _search(
         self,
         keyword: str,
@@ -155,7 +152,10 @@ class ArxivScraper:
         }
         resp = self.session.get(ARXIV_API, params=params, timeout=60)
         resp.raise_for_status()
-        return _parse_arxiv_xml(resp.text)
+        papers = _parse_arxiv_xml(resp.text)
+        root = ET.fromstring(resp.text)
+        response_records(self, len(root.findall("atom:entry", NS)), max_results)
+        return papers
 
 
 # ---------------------------------------------------------------------------
@@ -163,11 +163,12 @@ class ArxivScraper:
 # ---------------------------------------------------------------------------
 
 def _parse_arxiv_xml(xml_text: str) -> List[Paper]:
-    try:
-        root = ET.fromstring(xml_text)
-    except ET.ParseError as exc:
-        logger.error("ArXiv XML parse error: %s", exc)
-        return []
+    root = ET.fromstring(xml_text)
+    if root.tag != "{" + NS["atom"] + "}feed":
+        raise ValueError("Expected Atom feed")
+    for entry in root.findall("atom:entry", NS):
+        if (entry.findtext("atom:id", "", NS) or "").endswith("/errors"):
+            raise ValueError("arXiv returned an API error feed")
 
     papers: List[Paper] = []
     for entry in root.findall("atom:entry", NS):

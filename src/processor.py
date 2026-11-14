@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from .config import CONFERENCES, TOPICS
 from .models import Paper
+from .identity import identity_groups
 
 logger = logging.getLogger(__name__)
 
@@ -65,26 +66,32 @@ class PaperProcessor:
 
 def _deduplicate(papers: List[Paper]) -> List[Paper]:
     """Merge duplicates, keeping the richest metadata."""
-    seen: Dict[str, Paper] = {}
-    for p in papers:
-        pid = p.get_id()
-        if pid not in seen:
-            seen[pid] = p
-        else:
-            existing = seen[pid]
+    result = []
+    for group in identity_groups([vars(p) for p in papers]):
+        existing = papers[group[0]]
+        existing.sources = sorted({s for i in group for s in (papers[i].sources or [papers[i].source]) if s})
+        for i in group[1:]:
+            p = papers[i]
             # Enrich existing record rather than replacing it
             if p.conference and not existing.conference:
                 existing.conference = p.conference
             if p.abstract and not existing.abstract:
                 existing.abstract = p.abstract
-            if p.year and not existing.year:
-                existing.year = p.year
-            if p.published_date and not existing.published_date:
+            if p.year:
+                existing.year = min(existing.year, p.year) if existing.year else p.year
+            verified = p.date_kind in ("publication", "submission")
+            current_verified = existing.date_kind in ("publication", "submission")
+            if p.published_date and (not existing.published_date or
+                    (verified and (not current_verified or p.published_date < existing.published_date))):
                 existing.published_date = p.published_date
+                existing.date_kind = p.date_kind
+            if p.arxiv_id and not existing.arxiv_id:
+                existing.arxiv_id = p.arxiv_id
             # Prefer higher-priority source when merging duplicates
             if _SOURCE_PRIORITY.get(p.source, 99) < _SOURCE_PRIORITY.get(existing.source, 99):
                 existing.source = p.source
-    return list(seen.values())
+        result.append(existing)
+    return result
 
 
 def _detect_conference(paper: Paper) -> Optional[str]:

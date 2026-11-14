@@ -73,6 +73,8 @@ jobs:
           fi
 
       - name: Run paper finder
+        id: collect
+        continue-on-error: true
         env:
           SS_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
         run: |
@@ -86,12 +88,24 @@ jobs:
           if [ "${{ github.event.inputs.skip_openreview }}" = "true" ]; then
             SKIP_FLAGS="$SKIP_FLAGS --skip-openreview"
           fi
-          python main.py --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
+          python main.py --strict --date "${{ steps.date.outputs.value }}" $SKIP_FLAGS
+
+      - name: Save collection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: collection-${{ steps.date.outputs.value }}-${{ github.run_id }}
+          path: |
+            output/${{ steps.date.outputs.value }}.json
+            output/${{ steps.date.outputs.value }}.md
+          if-no-files-found: warn
+          retention-days: 30
 
       # ------------------------------------------------------------------ #
       # 4. Commit & push the report
       # ------------------------------------------------------------------ #
       - name: Commit report
+        if: always() && steps.date.outcome == 'success'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -99,3 +113,7 @@ jobs:
           git diff --staged --quiet || \
             git commit -m "digest: daily paper report ${{ steps.date.outputs.value }}"
           git push
+
+      - name: Fail run when collection validation failed
+        if: always() && steps.collect.outcome == 'failure'
+        run: exit 1
