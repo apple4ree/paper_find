@@ -1,14 +1,14 @@
-# Daily Paper Digest — 2026-11-15 (Sunday)
+# Daily Paper Digest — 2026-11-16 (Monday)
 
 | Source | Topics |
 |--------|--------|
 | AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview | Agent · Harness · Finance |
 
-**200 unique papers** (258 topic-entries — cross-topic papers counted once per category)
+**300 unique papers** (385 topic-entries — cross-topic papers counted once per category)
 
 ---
 
-## Agent  (95)
+## Agent  (184)
 
 ### ICML
 
@@ -420,55 +420,519 @@ Furthermore…
   - **ICML 2025** · OpenReview · `2011-01-01`
   - Automated trading in electronic markets is one of the most common and consequential applications of autonomous software agents.
 
+- **[The Berkeley Function Calling Leaderboard (BFCL): From Tool Use to Agentic Evaluation of Large Language Models](https://www.semanticscholar.org/paper/d67976e4cd3ddc541172455c854c2be76d15baae)**
+  - *Shishir G. Patil, Huan-Zhi Mao, Fanjia Yan et al.*
+  - **ICML 2025**
+
+
+### ICLR
+
+- **[AI Reviews Are Biased Towards the Appendix](https://arxiv.org/abs/2611.17811)**
+  - *Saptarshi Ghosh, Mohammad Saim, Tianyu Jiang*
+  - **ICLR** · 🤗 Featured · `2026-11-13`
+  - Large language models (LLMs) are increasingly used by reviewers to highlight weaknesses during the reviewing process, and their outputs often shape the reviews that humans submit. Prior work studies how LLM reviews align with human ones, yet we know little about which parts of a…
+
+- **[STAR: Similarity-guided Teacher-Assisted Refinement for Super-Tiny Function Calling Models](https://arxiv.org/abs/2602.03022)**
+  - *Jiliang Ni, Jiachen Pu, Zhongyi Yang et al.*
+  - **ICLR 2026** · `2026-02-03`
+  - The proliferation of Large Language Models (LLMs) in function calling is pivotal for creating advanced AI agents, yet their large scale hinders widespread adoption, necessitating transferring their capabilities into smaller ones. However, existing paradigms are often plagued by o…
+
+- **[Towards Reliable Benchmarking: A Contamination Free, Controllable Evaluation Framework for Multi-step LLM Function Calling](https://arxiv.org/abs/2509.26553)**
+  - *Seiji Maekawa, Jackson Hassell, Pouya Pezeshkpour et al.*
+  - **ICLR 2025** · `2025-09-30`
+  - Existing benchmarks for tool-augmented language models (TaLMs) lack fine-grained control over task difficulty and remain vulnerable to data contamination. We present FuncBenchGen, a unified, contamination-free framework that evaluates TaLMs by generating synthetic multi-step tool…
+
+
+### ACL
+
+- **[Interactive Program Induction with Language Model Priors](https://arxiv.org/abs/2611.18485v1)**
+  - *Robin Shing Moon Chan, Ryan Cotterell*
+  - **ACL** · `2026-11-13`
+  - Program induction refers to the process in which a learner aims to recover a program from a few given input-output examples. This paradigm broadens programming access by letting users demonstrate the rule-based behavior they want to apply to unseen data, instead of having to impl…
+
+- **[VLAN: Vision-Language Accessible Navigation](https://arxiv.org/abs/2611.18346v1)**
+  - *Jie Hu, Yu Zheng, Wenzhi Wu et al.*
+  - **ACL** · `2026-11-13`
+  - Accessible mobility is user-conditioned rather than scene-intrinsic, as walkable paths for one embodiment are inaccessible to another. Yet, existing benchmarks evaluate traversability under a fixed and limited embodiment. We present Vision-Language Accessible Navigation (VLAN), c…
+
+- **[R2IF: Aligning Reasoning with Decisions via Composite Rewards for Interpretable LLM Function Calling](https://arxiv.org/abs/2604.20316)**
+  - *A. Cheng, Kai-Long Wang, Ling Shi et al.*
+  - **ACL 2026** · `2026-04-22`
+  - Function calling empowers large language models (LLMs) to interface with external tools, yet existing RL-based approaches suffer from misalignment between reasoning processes and tool-call decisions. We propose R2IF, a reasoning-aware RL framework for interpretable function calli…
+
+- **[GenesisFunc: Multi-Agent Data Generation for Accurate and Generalizable Function-Calling](https://arxiv.org/abs/2605.28835)**
+  - *Hao-Ming Xu, Chong Deng, Jia-Qing Liu et al.*
+  - **ACL 2026** · `2026-04-10`
+  - Large Language Models (LLMs) extend their capabilities through function-calling (FC), which relies on training data with high quality, diversity, and broad coverage of scenario. However, obtaining and annotating real function-calling data is challenging, while synthetic data from…
+
+- **[Dynamic Tool Dependency Retrieval for Lightweight Function Calling](https://arxiv.org/abs/2512.17052)**
+  - *Bhrij Patel, Davide Belli, Amir Jalalirad et al.*
+  - **ACL 2025** · `2025-12-18`
+  - Function calling agents powered by Large Language Models (LLMs) select external tools to automate complex tasks. On-device agents typically use a retrieval module to select relevant tools, improving performance and reducing context length. However, existing retrieval methods rely…
+
+- **[ToolPRM: Fine-Grained Inference Scaling of Structured Outputs for Function Calling](https://arxiv.org/abs/2510.14703)**
+  - *Jianghao Lin, Yuanyuan Shi, Xin Peng et al.*
+  - **ACL 2025** · `2025-10-16`
+  - Large language models (LLMs) excel at function calling, but inference scaling has been explored mainly for unstructured generation. We propose an inference-scaling framework for structured outputs that combines fine-grained beam search with \textbf{ToolPRM}, a process reward mode…
+
+- **[Enhancing LLM Function Calling with Structured Outputs](https://www.semanticscholar.org/paper/a69e3e16054fa053bab743bf8fc8354a08b9636f)**
+  - *Kevin Séjourné, A. Lata*
+  - **ACL 2025** · `2025-08-18`
+  - Large Language Models (LLMs) are increasingly used for function calling, typically by prompting the model to generate a specific format. This paper proposes an alternative approach leveraging structured outputs to enforce the desired format. This method offers several advantages,…
+
+- **[MemBench: Towards More Comprehensive Evaluation on the Memory of LLM-based Agents](https://arxiv.org/abs/2506.21605)**
+  - *Hao-Ran Tan, Ze-Yu Zhang, Chen Ma et al.*
+  - **ACL 2025** · `2025-06-20`
+  - Recent works have highlighted the significance of memory mechanisms in LLM-based agents, which enable them to store observed information and adapt to dynamic environments. However, evaluating their memory capabilities still remains challenges. Previous evaluations are commonly li…
+
+- **[CONFETTI: Conversational Function-Calling Evaluation Through Turn-Level Interactions](https://arxiv.org/abs/2506.01859)**
+  - *Tamer Alkhouli, Katerina Margatina, James Gung et al.*
+  - **ACL 2025** · `2025-06-02`
+  - We introduce Conversational Function-Calling Evaluation Through Turn-Level Interactions (CONFETTI), a conversational benchmark1 designed to evaluate the function-calling capabilities and response quality of large language models (LLMs). Current benchmarks lack comprehensive asses…
+
+- **[ProjectEval: A Benchmark for Programming Agents Automated Evaluation on Project-Level Code Generation](https://arxiv.org/abs/2503.07010)**
+  - *Kaiyuan Liu, You-Cheng Pan, Yang Xiang et al.*
+  - **ACL 2025** · `2025-03-10`
+  - Recently, LLM agents have made rapid progress in improving their programming capabilities. However, existing benchmarks lack the ability to automatically evaluate from users' perspective, and also lack the explainability of the results of LLM agents' code generation capabilities.…
+
+- **[SOTOPIA-Ω: Dynamic Strategy Injection Learning and Social Instruction Following Evaluation for Social Agents](https://arxiv.org/abs/2502.15538)**
+  - *Wenyuan Zhang, Tian-Yun Liu, Mengxiao Song et al.*
+  - **ACL 2025** · `2025-02-21`
+  - Despite the abundance of prior social strategies possessed by humans, there remains a paucity of research dedicated to their transfer and integration into social agents. Our proposed SOTOPIA-$\Omega$ framework aims to address and bridge this gap, with a particular focus on enhanc…
+
+- **[Meta-Tool: Unleash Open-World Function Calling Capabilities of General-Purpose Large Language Models](https://aclanthology.org/2025.acl-long.1481.pdf)**
+  - *Sheng-Qian Qin, Ya-Kun Zhu, Lin-Jie Mu et al.*
+  - **ACL 2025**
+  - Large language models (LLMs) have show-cased remarkable capabilities as autonomous agents when augmented with external tools. Equipped with fixed tool sets, LLMs struggle with addressing diverse user inquiries in open-world tasks. To evaluate and boost the performance of LLMs in…
+
+- **[RAGthoven at SemEval 2025 - Task 2: Enhancing Entity-Aware Machine Translation with Large Language Models, Retrieval Augmented Generation and Function Calling](https://www.semanticscholar.org/paper/9259321c507460c5a9989d3b5fff910d99469159)**
+  - *Demetris Skottis, Gregor Karetka, Marek Suppa*
+  - **ACL 2025**
+
+- **[Progra: Progress-Aware Reinforcement Learning for Multi-Turn Function Calling](https://aclanthology.org/2026.findings-acl.325.pdf)**
+  - *Hua-Can Chai, Zi-ang Cao, Mao-Lin Ran et al.*
+  - **ACL 2026**
+  - Real-world tasks with Large Language Models (LLMs) require multi-turn, multi-step conversations, often involving complex function calls and multiple user interactions. Existing methods either decompose multi-turn trajectories into independent single samples, neglecting task-level…
+
+- **[BalanceSFT: Improving LLM Function Calling with Balanced Training Signals and Data Hardness](https://aclanthology.org/2026.findings-acl.900.pdf)**
+  - *Bing-Guang Hao, Zeng-Zhuang Xu, Mao-Lin Wang et al.*
+  - **ACL 2026**
+  - ,
+
+
+### EMNLP
+
+- **[Extending FunctionGemma for Practical On-Device Mobile Function Calling](https://arxiv.org/abs/2609.25373)**
+  - *Ali Rezagholizadeh, Soheila Samiee*
+  - **EMNLP 2026** · `2026-09-21`
+  - On-device assistants require function-calling models that map natural language to local system actions, but existing resources emphasize web APIs or narrow mobile-action catalogs. We extend FunctionGemma 270M-it to practical Android workflows by introducing MOBILEACTIONSEXTENDED,…
+
+- **[Attributing Structured-Output Gains in Function Calling: Interface Alignment versus Procedural Transfer](https://arxiv.org/abs/2607.02595)**
+  - *Wan-Yi Chen, Dao-Yuan Chen, Fang Kong*
+  - **EMNLP 2026** · `2026-07-01`
+  - Structured-output benchmarks reward both task decisions and interface compliance, so prompt-induced function-calling gains require attribution before they can be interpreted as transferable skill. We introduce a four-layer gain-attribution protocol for prompt-prepended skill inje…
+
+- **[AsyncTool: Evaluating the Asynchronous Function Calling Capability under Multi-Task Scenarios](https://arxiv.org/abs/2605.27995)**
+  - *Kou Shi, Ziao Zhang, Shi-Ting Huang et al.*
+  - **EMNLP 2026** · `2026-05-27`
+  - Large language model (LLM)-based agents have shown strong capabilities in using external tools to solve complex tasks. However, existing evaluations often overlook the temporal dimension of tool use, especially the impact of tool response latency, and are usually limited to singl…
+
+- **[Improving Large Language Models Function Calling and Interpretability via Guided-Structured Templates](https://arxiv.org/abs/2509.18076)**
+  - *Hy Dang, Tianyi Liu, Zhuofeng Wu et al.*
+  - **EMNLP 2025** · `2025-09-22`
+  - Large language models (LLMs) have demonstrated strong reasoning and tool-use capabilities, yet they often fail in real-world tool-interactions due to incorrect parameterization, poor tool selection, or misinterpretation of user intent. These issues often stem from an incomplete u…
+
+- **[Self-Guided Function Calling in Large Language Models via Stepwise Experience Recall](https://arxiv.org/abs/2508.15214)**
+  - *Sijia Cui, Aiyao He, Shuai Xu et al.*
+  - **EMNLP 2025** · `2025-08-21`
+  - Function calling enables large language models (LLMs) to interact with external systems by leveraging tools and APIs. When faced with multi-step tool usage, LLMs still struggle with tool selection, parameter generation, and tool-chain planning. Existing methods typically rely on…
+
+- **[MASSIVE-Agents: A Benchmark for Multilingual Function-Calling in 52 Languages](https://aclanthology.org/2025.findings-emnlp.1099.pdf)**
+  - *Mayank Kulkarni, Vittorio Mazzia, J. Gaspers et al.*
+  - **EMNLP 2025**
+  - ,
+
+- **[DispatchQA: A Benchmark for Small Function Calling Language Models in E-Commerce Applications](https://aclanthology.org/2025.emnlp-industry.154.pdf)**
+  - *Joachim Daiber, Victor Maricato, Ayan Sinha et al.*
+  - **EMNLP 2025**
+  - We introduce DispatchQA , a benchmark to evaluate how well small language models (SLMs) translate open-ended search queries into executable API calls via explicit function calling . Our benchmark focuses on the latency-sensitive e-commerce setting and measures SLMs’ impact on bot…
+
 
 ### Other / arXiv
 
-- **[Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents](https://arxiv.org/abs/2611.17167)**
-  - *Haochen Liu, Qianhao Zhu, Zixuan Wang et al.*
-  - 🤗 Featured · `2026-11-12`
+- **[Envisioning Agentic Robotics: A New Era of Robotic Systems](https://arxiv.org/abs/2611.18359)**
+  - *Grid Robotics, Qingfeng Lan, Duo Li et al.*
+  - 🤗 Featured · `2026-11-13`
+  - The release of GPT-6 Astra marks the emergence of a new paradigm in robotics: agentic robotics. Within weeks, frontier models with agentic harnesses matched or exceeded task-specific policies on many embodied benchmarks. Instead of training a dedicated policy for each family of t…
 
-- **[DeepStress: Stress-Testing Deep Search Agents](https://arxiv.org/abs/2607.13920)**
-  - *Ismael Rousseau, Geraldine Damnati, Frederic Bechet*
-  - 🤗 Featured · `2026-11-12`
+- **[Gamer: A Generalist Vision-Language-Action Foundation Model for Long-Horizon Real-Time Game Agent](https://arxiv.org/abs/2611.18397)**
+  - *Run Luo, Kuan Zhang, Qi Deng et al.*
+  - 🤗 Featured · `2026-11-13`
+  - We introduce Gamer, a generalist agent framework built for long-horizon tasks in complex interactive environments. Its end-to-end architecture combines perception, memory management, and multi-step reasoning. A shared training and deployment pipeline supports interaction with bot…
 
-- **[JustRUA: A Controlled Study of GPT-6 Robot-Use Agents](https://arxiv.org/abs/2611.16009)**
-  - *Zefan Wang, Yufan Dang, Xuanwei Shi et al.*
-  - 🤗 Featured · `2026-11-11`
+- **[G-CAST: Governed Continual Self-Training for E-Commerce Agents under Evolving Demands](https://arxiv.org/abs/2611.17814)**
+  - *Yuechun Yu, Wenzheng Kong, Xiaofeng Mao et al.*
+  - 🤗 Featured · `2026-11-13`
+  - With the rapid advancement of Large Language Models (LLMs), an increasing number of users are turning to LLM-powered agents for conversational shopping in e-commerce. However, the user needs continue to change as new product categories, procurement scenarios, and feature requests…
 
-- **[A Cross-Scenario Survey and Analysis of Self-Evolving Multimodal Agents](https://arxiv.org/abs/2611.14256)**
-  - *Jingjing Jiang*
-  - 🤗 Featured · `2026-11-10`
+- **[Aligning AI Teams](https://arxiv.org/abs/2611.17820)**
+  - *Siddarth Srinivasan, Morgan Jane Matthews, Jascha Sohl-Dickstein et al.*
+  - 🤗 Featured · `2026-11-13`
+  - Previous work has shown that alignment training on individual LLM agents can fail to transfer to multi-agent settings. We investigate the underlying mechanisms for this failure, and explore interventions to preserve alignment transfer to multi-agent LLM teams. We focus on two sof…
 
-- **[HiVe-Mem: Interleaving Horizontal Memory Expansion and Vertical Evidence Composition for Multimodal Agents](https://arxiv.org/abs/2611.12872)**
-  - *Haozhen Zhang, Bohan Liu, Jianzhu Bao et al.*
-  - 🤗 Featured · `2026-11-09`
+- **[WebArena-Pro: A Heterogeneous, Multimodal, Reproducible Benchmark for Web Agents](https://arxiv.org/abs/2611.17955)**
+  - *Imene Kerboua, Fatemeh Pesaran Zadeh, Xing Han Lù et al.*
+  - 🤗 Featured · `2026-11-13`
+  - Web agents powered by large language and vision-language models are increasingly applied to realistic browser work that spans heterogeneous applications, multimodal content, and stateful workflows. However, existing reproducible web-agent benchmarks cover only a small number of w…
 
-- **[Who Remembers What? Multi-Granularity Memory Extraction for Multi-User, Multi-Agent Interaction](https://arxiv.org/abs/2611.10439)**
-  - *Yunzhe Wang, Mesut Erhan Unal, Sheng Zhang et al.*
-  - 🤗 Featured · `2026-11-07`
-
-- **[Agent-R^2: Scaling Agents for Realistic Productivity Work via Real-Source Data Synthesis](https://arxiv.org/abs/2611.08219)**
-  - *Teng Pan, Zixuan Wang, Yuchen Yan et al.*
-  - 🤗 Featured · `2026-11-05`
-
-- **[Evidence-Guided Recovery for AI Agents with Ambiguous Tool Outcomes and Partial Execution](https://arxiv.org/abs/2610.41453)**
-  - *Genliang Zhu, Xiaobo Chen, Ziyuan Wang et al.*
-  - 🤗 Featured · `2026-10-30`
+- **[JFinBench: A Continuously Refreshable Japanese Financial Benchmark from the Latest Certification Exams](https://arxiv.org/abs/2611.18130)**
+  - *Issa Sugiura, Taro Makino, Takashi Ishida*
+  - 🤗 Featured · `2026-11-13`
+  - Large language models (LLMs) are increasingly applied to finance, creating a need for benchmarks that evaluate their capabilities across financial systems with different regulations and practices. However, existing financial benchmarks provide limited coverage of country-specific…
 
 - **[Evidence-Governed Adoption of Self-Generated Updates in Autonomous AI Agents](https://arxiv.org/abs/2611.16378)**
   - *Subodh Lonkar*
-  - 🤗 · `2026-11-12`
+  - 🤗 Featured · `2026-11-12`
 
-- **[StateAlign: Internalizing State-Aware Decision-Making for Reliable Multi-Turn Tool Agents via Reinforcement Learning](https://arxiv.org/abs/2611.16304)**
-  - *Zhexi Lu, Subhajit Chaudhury, Tejaswini Pedapati et al.*
-  - 🤗 · `2026-11-12`
+- **[Interpreting Coding Agents Through Their Behavioral Trajectories](https://arxiv.org/abs/2611.17440)**
+  - *Ibragim Badertdinov, Alexander Golubev*
+  - 🤗 Featured · `2026-11-12`
 
 - **[VibePrevisBench: Evaluating Agentic Coding for 4D Scene Generation in Blender](https://arxiv.org/abs/2611.15789)**
   - *Yuzhe Chen, Muxi Diao, Lele Yang et al.*
-  - 🤗 · `2026-11-11`
+  - 🤗 Featured · `2026-11-11`
+
+- **[MIRIX-2.0: Multi-Agent Memory System](https://arxiv.org/abs/2611.12068)**
+  - *Wei-Chieh Huang, Weizhi Zhang, Jiayan Nan et al.*
+  - 🤗 Featured · `2026-11-09`
+
+- **[GH-AWTrace: A Large-Scale Dataset of GitHub Agentic Workflow Execution Logs](https://arxiv.org/abs/2611.06866)**
+  - *Jasem Khelifi, Hao Li, Ali Ouni et al.*
+  - 🤗 Featured · `2026-11-04`
+
+- **[OutfitterBench: Evaluating LLM Agents on Long-Horizon Resource Allocation and Commitment Coordination](https://arxiv.org/abs/2611.17933)**
+  - *Jie Huang, Yuecheng Hong, Yao Chen et al.*
+  - 🤗 · `2026-11-13`
+  - In many long-horizon settings, an agent's own choices create future constraints: committing finite capacity establishes future obligations and forecloses later opportunities. Sustaining performance therefore requires both keeping evolving plans feasible and comparing the value of…
+
+- **[Vision-as-a-Tool: Visual Harness for Multimodal Agentic Coding](https://arxiv.org/abs/2611.17797)**
+  - *Haolin Yang, Wenshan Wu, Jin Jiang et al.*
+  - 🤗 · `2026-11-13`
+  - Multimodal agentic coding requires robust visual reasoning to analyze observations and evaluate generated artifacts. Current frameworks largely rely on a Thinking-with-Images paradigm, where agents depend on their intrinsic vision to execute visually grounded tasks. However, this…
+
+- **[LuthorSQL: A One-Pass Text-to-SQL Model as System 1 for a Slower LLM Agent](https://arxiv.org/abs/2611.17780)**
+  - *Ibrahim Memon, Armin Karamzade, M. Hanif Jhaveri et al.*
+  - 🤗 · `2026-11-13`
+  - Frontier LLM agents that query databases with tools are among the most accurate text-to-SQL systems, but per-query calls to a hosted model are slow, costly, and expose sensitive organizational queries to external APIs. For example, a Claude Opus 5.5 agent serving 10,000 queries a…
+
+- **[DesignSpecs: A DESIGN.md Dataset of Visual Design Specifications for AI Agents](https://arxiv.org/abs/2611.17713)**
+  - *Jialiang Wei, Walid Maalej*
+  - 🤗 · `2026-11-13`
+
+- **[AscendGYM: A Cost-Aware Kernel Optimization Benchmark for Real-World Workloads on Ascend NPUs](https://arxiv.org/abs/2611.17621)**
+  - *AI Training Platform Team, Bingwei Zhang, Jing Li et al.*
+  - 🤗 · `2026-11-13`
+  - Kernel optimization is essential for efficient large language model (LLM) training and inference on Ascend NPUs. Existing Ascend kernel benchmarks primarily focus on kernel generation, with less emphasis on the ability of agents to optimize existing implementations under input co…
+
+- **[Actor, Judge, or Teacher? Understanding Decision Models in Long-Horizon Agents](https://arxiv.org/abs/2611.17167)**
+  - *Haochen Liu, Qianhao Zhu, Zixuan Wang et al.*
+  - 🤗 · `2026-11-12`
+
+- **[WeightBench: Evaluating Language Models as Weight-Space Programmers](https://arxiv.org/abs/2611.18553v1)**
+  - *Aayush Marasini, Barsat Khadka, Nick Rahimi*
+  - `2026-11-13`
+  - Recent work shows that large language models (LLMs) can operate directly on the parameters of other neural networks. They can read what a network was trained to do, fix a network that fails, and write working networks from scratch, all without gradient descent. This capability ha…
+
+- **[Imitation Bootstrapped Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2611.18543v1)**
+  - *Tony H. Zhang, Connor Mattson, Daniel S. Brown*
+  - `2026-11-13`
+  - Demonstrations are an effective way to accelerate single-agent reinforcement learning (RL), but extending this idea to multi-agent reinforcement learning (MARL) is non-trivial as it is difficult and often impossible for a single person to teleoperate multiple agents simultaneousl…
+
+- **[ModHarness-RL: Recasting Harnesses as Learnable and Evolving Programs for Agentic RL](https://arxiv.org/abs/2611.18533v1)**
+  - *Zelin He, Siyu Zhu, Jacob Helwig et al.*
+  - `2026-11-13`
+  - Agentic reinforcement learning (RL) increasingly relies on a harness, the scaffold around the model that decides what it sees of its own interaction and what guidance it receives. Most existing approaches train under a hand-written harness that stays fixed throughout. However, an…
+
+- **[Alignment by Socialization: Learning Tradeoffs Under Selection](https://arxiv.org/abs/2611.18531v1)**
+  - *Thomas Brennan, Andrew W. Lo, Chaoyi Zhao*
+  - `2026-11-13`
+  - Artificial intelligence (AI) agents are expected to complete tasks while following rules of conduct, but these objectives can conflict. We study how evolutionary selection shapes an agent's choices between them, and whether experience can make those choices reflect human judgment…
+
+- **[Can Mechanistic Interpretability Help Explain LLM Agent Failures? A Case Study on Web Element Hallucination](https://arxiv.org/abs/2611.18514v1)**
+  - *Mohamed Aghzal, Mor Geva, Gregory J. Stein et al.*
+  - `2026-11-13`
+  - Mechanistic Interpretability (MI) has made significant progress in explaining the internal computations of Large Language Models (LLMs); however, these advances have yet to demonstrate comparable success in explaining the decision-making processes of LLM-based agents. This paper…
+
+- **[Agentic AI for Discovering Fault-Tolerant Quantum Circuits](https://arxiv.org/abs/2611.18504v1)**
+  - *Aritra Lahiri, Florian Marquardt*
+  - `2026-11-13`
+  - Scaling quantum computing toward practical quantum advantage is currently limited by the efficiency of circuits that operate on information encoded by quantum error-correcting codes. The full stack of quantum computing encompasses several tasks: preparation of logical code states…
+
+- **[TradeGauntlet: Evaluating Compliance Controls for Autonomous Trading Agents](https://arxiv.org/abs/2611.18493v1)**
+  - *Sandip Nandi, Aishwarya Bose, Apurba Bose et al.*
+  - `2026-11-13`
+  - Autonomous trading agents need controls that prevent problematic orders without making legitimate tasks impractical. We study this aspect of agentic compliance with TradeGauntlet, a replayable limit-order-book simulator that separates detection, prevention, and execution cost. In…
+
+- **[From AI-Enabled Remote Patient Monitoring Toward Agentic Robotics: Embodiment, Governance, and Care Integration](https://arxiv.org/abs/2611.18484v1)**
+  - *Ivana Ragusa, Lorenzo Guiducci, Filippo Cavallo*
+  - `2026-11-13`
+  - AI-enabled remote patient monitoring is evolving beyond passive data collection toward agentic AI systems that interpret patient states, coordinate care, and initiate action across domestic and clinical settings. This structured scoping review finds that mature agentic care has n…
+
+- **[Do Verifier Judgments Survive Abstraction? Measuring Verification Transport for LLM Agent Evaluation](https://arxiv.org/abs/2611.18471v1)**
+  - *Disha Sheshanarayana, Sai Linisha Reddy Goli*
+  - `2026-11-13`
+  - LLM-based verifiers are increasingly used to evaluate agent executions, but their reliability is typically measured under a single representation of the trajectory. In deployed agent systems, the same execution may be exposed through composed tools, delegation boundaries, or comp…
+
+- **[When to Trust Simulated Patient Responses:Support-Gated World Models for Vasopressor Decision Support](https://arxiv.org/abs/2611.18458v1)**
+  - *Yifan Jin, Tao Liu*
+  - `2026-11-13`
+  - Clinical world models expose language-model agents to predicted patient responses, but simulations can be unreliable for poorly supported treatments or unfamiliar hospitals. We introduce Support-Gated World-Model decision support, a lightweight extension of a propose--simulate--r…
+
+- **[Smart Home Agents Make Capable but Unpredictable Grid Operators](https://arxiv.org/abs/2611.18395v1)**
+  - *Christopher Terrazas, Eduardo Cotilla-Sanchez*
+  - `2026-11-13`
+  - AI-enabled smart homes are becoming more common across the grid edge. However, there has not been much work on failure response. This area is critical because smart homes operate on the grid edge where failures can cascade down. If a power outage happens within a smart home, a us…
+
+- **[Experts Across Schemas: Agent-Guided Mixture-of-Relational-Experts for Cross-Database Generalization](https://arxiv.org/abs/2611.18315v1)**
+  - *Hiren Madhu, Sukanta Ganguly, Kiran Srinivasan et al.*
+  - `2026-11-13`
+  - Web platforms record user and item activity in relational databases whose schemas differ from platform to platform, which makes it difficult to transfer predictive models between them. Relational foundation models address this through cross-database pretraining, yet recent improv…
+
+- **[PrivacyPR: A Dataset of Real-World Privacy Fixes for Benchmarking Privacy-Aware Code Review](https://arxiv.org/abs/2611.18293v1)**
+  - *Hua Yang, Aditya Bhardwaj, Shidong Pan et al.*
+  - `2026-11-13`
+  - Coding agents increasingly review code, yet whether they catch the privacy defects that laws such as the GDPR require software to avoid remains largely untested, partly because few datasets connect real privacy defects to their accepted fixes and review context. We present Privac…
+
+- **[Who Should Be on the Panel? Task-Conditioned Persona Selection for LLM Trading Agents](https://arxiv.org/abs/2611.18150v1)**
+  - *Boming Yang, Yuquan Wang, Jiaxian Guo et al.*
+  - `2026-11-13`
+  - Multi-agent LLM systems are built by fixing a cast of roles and then designing how the cast coordinates. Which agents should make up the group for a given task is left to the designer, and the same cast is reused for every task. Financial trading makes the cost of that choice vis…
+
+- **[Large Language Model-Empowered Intelligent Agent for Adaptive Fast-Charging Control of Lithium-Ion Batteries](https://arxiv.org/abs/2611.18140v1)**
+  - *Joey Chan, Haoyu Pan, Zhen Chen et al.*
+  - `2026-11-13`
+  - Fast charging of lithium-ion batteries is a multi-objective control problem that requires reducing charging time and sustaining high energy throughput while suppressing accelerated degradation and safety-critical electrochemical reactions. Conventional protocols are easy to imple…
+
+- **[PUMA-Former: Uncertainty-Aware Agentic Computation Offloading in MEO-LEO Satellite Networks With Incomplete Information](https://arxiv.org/abs/2611.18139v1)**
+  - *Yi Jing, Chunxiao Jiang, Jiawei Wang et al.*
+  - `2026-11-13`
+  - Satellite edge computing distributes mobile workloads across moving processors whose service capacity must be coordinated over time. In medium Earth orbit (MEO)--low Earth orbit (LEO) networks, periodic reports leave CPU states stale or missing, making offloading sensitive to unc…
+
+- **[Interpretable weight-space programming builds transparent transformers and brain encoding models](https://arxiv.org/abs/2611.18114v1)**
+  - *Yash Mehta, Chandan Singh, Weijia Xu et al.*
+  - `2026-11-13`
+  - Neural networks are powerful predictors, yet their opacity limits their usefulness in science, where the goal is explanation rather than mere prediction. In neuroscience, for example, deep encoding models accurately predict brain activity in response to natural stimuli, but strug…
+
+- **[Do Machines Learn Deviance From Their Peers? A Randomized Test of Differential Association With AI Agents](https://arxiv.org/abs/2611.18098v1)**
+  - *Murat Ozer, Arif Akgul, Amitabh Chakravorty*
+  - `2026-11-13`
+  - Differential association theory and its extension, social learning theory, hold that rule-breaking, and the definitions that make it acceptable, are learned through interaction with others. Because people choose their friends, this claim has been hard to test. We addressed this s…
+
+- **[TelePhysica: Agentic Reconstruction of Physically Interactive Scenes](https://arxiv.org/abs/2611.18078v1)**
+  - *Ruiqi Shu, Xufeng Zhan, Yuanzhi Liang et al.*
+  - `2026-11-13`
+  - Direct image-to-video diffusion models entangle pixel synthesis with implicit latent motion, precluding persistent 3D mechanical equilibrium, mid-rollout intervention, and counterfactual force control. Conversely, single-pass programmatic 3D reconstruction from an uncalibrated ph…
+
+- **[A$^3$: Adaptive Audio Agent Framework for Collaborative Edge Computing](https://arxiv.org/abs/2611.18064v1)**
+  - *Zexin Li, Xueyi Zhang, Tao Ren et al.*
+  - `2026-11-13`
+  - Embedded audio agents need a nearby edge server for speed, but a server-dependent agent returns nothing when the link fails. We present A$^3$, an adaptive audio agent framework that places whole pipeline stages on the server, keeps a complete fallback agent on devices that can ho…
+
+- **[From Images to Grounded Edits: A Real-World Benchmark for Chinese Grammatical Error Correction in Handwritten Essays](https://arxiv.org/abs/2611.17966v1)**
+  - *Weiru Zhang, Yuzhong Hong, Junwei Bao et al.*
+  - `2026-11-13`
+  - Chinese Grammatical Error Correction (CGEC) is typically formulated as a text-to-text problem. While suitable for digital texts, this formulation falls short in real-world K-12 education, where AI-assisted corrections are expected directly on essay images, which are primarily han…
+
+- **[Can You Trust Your Finance Agent? Drift, Diagnosis and Auditable Intervention on One Shipped Financial Research Agent](https://arxiv.org/abs/2611.17939v1)**
+  - *Cosimo Galeone, Anna Ettorre, Ginevra Mariani et al.*
+  - `2026-11-13`
+  - Can you trust a finance agent you did not build? We take the reference agent shipped with the Vals Finance Agent Benchmark v2, leave it untuned, and ask four questions a leaderboard score does not answer. Is the score stable? Seven identical runs on 18 questions pass between 105…
+
+- **[MineralExp: Benchmarking LLM Agents for Experimental Design in Real-World Mineral Exploration](https://arxiv.org/abs/2611.17931v1)**
+  - *Bing Wang, Mingyang Wang, Yuanhang Mi et al.*
+  - `2026-11-13`
+  - In mineral exploration, verifying geological hypotheses relies on designing a variety of geochemical experiments. While large language model (LLM) agents increasingly automate downstream geoscientific data analysis, a crucial upstream capability remains largely unexplored: automa…
+
+- **[When Cooperation Must Change: Semantic Strategy Unlearning in Multi-Agent Reinforcement Learning](https://arxiv.org/abs/2611.17917v1)**
+  - *Wenhan Wu, Linghan Chen, Yudong Gao et al.*
+  - `2026-11-13`
+  - Cooperative multi-agent reinforcement learning (MARL) supports coordinated decision-making in distributed Web services, multi-robot control, and collaborative games through learned coordination conventions. When deployment requirements change, a previously useful convention may b…
+
+- **[Adversarially Attacking Symbolic Vocabulary Vulnerabilities In LLM Planners](https://arxiv.org/abs/2611.17910v1)**
+  - *Stephen Obadinma, Xiaodan Zhu*
+  - `2026-11-13`
+  - As large language models (LLMs) are increasingly deployed as autonomous agents, their abilities in navigating automated planning tasks have become essential. However, despite their strengths, LLMs' planning ability is not robust, particularly when they are not allowed to exploit…
+
+- **[Securing Multi-Agent Systems by Design](https://arxiv.org/abs/2611.17883v1)**
+  - *Xilong Wang, Xiaoxing Chen, Neil Gong*
+  - `2026-11-13`
+  - Multi-agent systems solve complex tasks by decomposing them into subtasks, delegating the subtasks to agents, and aggregating the agents' responses using an aggregation rule. Malicious agents can manipulate the final solution by providing malicious responses to their assigned sub…
+
+- **[Soteria: Formally Verified Planning with Runtime Enforcement for Safe LLM Agents](https://arxiv.org/abs/2611.17880v1)**
+  - *Mike He, Ankush Desai, Sharad Malik et al.*
+  - `2026-11-13`
+  - LLM agents that execute multi-step tool calls must satisfy two objectives simultaneously: completing the user's task (utility) and conforming to domain policies and correctness constraints (safety). These objectives are in tension -- blocking an unsafe action prevents a violation…
+
+- **[SceneAgent: A Multi-Agent Framework for Portable Game Scene Generation](https://arxiv.org/abs/2611.17821v1)**
+  - *Xingyi Li, Jiahao Yang, Yiqin Zhu et al.*
+  - `2026-11-13`
+  - Moving a scene generator to a new game engine requires more than exporting its final output: planning, construction tools, and stored experience may also depend on the original backend. We present SceneAgent, a multi-agent framework for reusing the construction process and its ex…
+
+- **[Causally Constrained and Uncertainty-Aware Cardiopulmonary Risk Prediction](https://arxiv.org/abs/2611.17819v1)**
+  - *Yuxiang Lai, Jiashuo Zhang, Liang Zhao et al.*
+  - `2026-11-13`
+  - Routine chest computed tomography (CT) captures pulmonary, cardiac, and vascular phenotypes that jointly stratify lung cancer and cardiovascular disease, the two leading causes of death in lung-screening populations. Yet clinical risk calculators evaluate each disease in isolatio…
+
+- **[CarryOn: Learning What to Keep in Context for Long-Horizon LLM Agents](https://arxiv.org/abs/2611.17808v1)**
+  - *Lihuan Li, Ruiyi Yang, Jiru Wang et al.*
+  - `2026-11-13`
+  - Long-horizon LLM agents can coordinate tools and applications to complete complex, multi-step tasks. As their interaction histories grow, effective context management becomes essential for reliable and efficient execution. Existing methods reduce context through summarization, pr…
+
+- **[Can Agents Keep Up with Time? An Empirical Analysis of Temporal Adaptation After a Conversational Hiatus](https://arxiv.org/abs/2611.17806v1)**
+  - *Hongguan Su, Ming Wang, Shun Zhang et al.*
+  - `2026-11-13`
+  - Long-horizon agents increasingly serve as persistent personal assistants across modern web platforms, managing schedules, applications, and multi-step plans over weeks or months. Users often return to an ongoing conversation after a long conversational hiatus, while earlier booki…
+
+- **[MASTARS: Multi-Agent Sequential Trajectory Augmentation with Return-Conditioned Subgoals](https://arxiv.org/abs/2611.17793v1)**
+  - *Jiwon Jeon, Myungsik Cho, Woojun Kim et al.*
+  - `2026-11-13`
+  - The performance of offline Multi-Agent Reinforcement Learning (MARL) is limited by the quality of the fixed offline dataset, motivating trajectory augmentation. However, augmenting multi-agent trajectories presents a fundamental challenge of the diversity-coordination trade-off:…
+
+- **[AutoRL: A Multi-Agent System towards Autonomous Reinforcement Learning](https://arxiv.org/abs/2611.17790v1)**
+  - *Simon Tang, Wenjie Shi, Yongjing Yin et al.*
+  - `2026-11-13`
+  - Recursive self-improvement (RSI) is one of the most promising paths toward an AI singularity for superintelligence. Achieving this vision requires AI systems to undertake the full training pipeline for iterative improvement. Reinforcement learning (RL) plays an essential role in…
+
+- **[Certified Improvements to Best-Known Thomson-Problem Configurations with a Search Pipeline Built with Large Language Model Agents](https://arxiv.org/abs/2611.17776v1)**
+  - *Hui Shao, Tao Wang, Xiaotian Liu et al.*
+  - `2026-11-13`
+  - The Thomson problem asks for N unit charges on a sphere with minimum Coulomb energy; for large N the best configurations known are curated in the Cambridge Cluster Database, whose largest-N entries were set in October 2026. We report configurations for N = 912, 1382 and 2502 with…
+
+- **[GDP.xlsx: Benchmarking Frontier Models on Professional Workbooks](https://arxiv.org/abs/2611.17766v1)**
+  - *Suhaas Garre, Sushant Mehta, Edwin Chen*
+  - `2026-11-13`
+  - We introduce GDP_xlsx, a benchmark of 70 realistic workplace requests written by professionals in 13 domains, each paired with an expert rubric of binary criteria and with the complete workbook or CSV file it refers to. Together the files hold 2.18 million populated cells, and th…
+
+- **[Creative Product Design under Brand Image Constraints](https://arxiv.org/abs/2611.17762v1)**
+  - *Takeshi Onishi, Hiroya Makino, Takahiro Yamaguchi et al.*
+  - `2026-11-13`
+  - Industrial design requires creative visual exploration while satisfying constraints that are often product-specific and implicit. Existing text-to-image (T2I) approaches can generate creative designs through concept blending or multi-agent self-enhancement, but they provide limit…
+
+- **[Superfluid: Local AI Server for Distributed LLM Inference](https://arxiv.org/abs/2611.17753v1)**
+  - *Prabod Rathnayaka, Isura Manchanayake, Srikandabala Kogul et al.*
+  - `2026-11-13`
+  - Running large language models (LLMs) on local devices keeps data private, removes per-token cost, cuts network latency, and keeps working without a connection. Two shifts now strain how such models are served. On one device, several agents share a locally served model with an int…
+
+- **[Logically Consistent Accurate Forecasts](https://arxiv.org/abs/2611.17735v1)**
+  - *Kate Yuan, Rohan Alur, Manish Raghavan et al.*
+  - `2026-11-13`
+  - Agentic forecasting systems based on large language models (LLMs) are now competitive with expert human forecasters, but these systems still suffer from a critical limitation: the inability to produce forecasts that are logically consistent. For example, forecasts for related eve…
+
+- **[Co-Sight Harness: Externalized Control Assets and Deterministic Enforcement for Long-Horizon Business Agents](https://arxiv.org/abs/2611.17696v1)**
+  - *Luyao Wang, Xijun Zhu, Zhaohui Hao et al.*
+  - `2026-11-13`
+  - Long-horizon business workflows fail in two ways: errors accumulate as a chain of activities lengthens, and the knowledge an activity needs is written in a different vocabulary from the user's request. We study whether such workflows can be made reliable without changing the lang…
+
+- **[Agent-written heuristics versus commercial solvers on unsolved job-shop benchmark instances](https://arxiv.org/abs/2611.17682v1)**
+  - *Andre Albrecht, Enzo Morosini Frazzon, Leandro C. Coelho et al.*
+  - `2026-11-13`
+  - Commercial solvers are the standard tool for difficult scheduling problems. We study whether a frontier large language model, used as a coding agent with open-source tools only, can match them in quality and speed. We report every run, and independent checkers verify every schedu…
+
+- **[OCTAVE: A Capability-Resolved Benchmark for End-to-End HTML5 Game Generation](https://arxiv.org/abs/2611.17681v1)**
+  - *Kehang Li, Xinlan Xu, Yulin Jin et al.*
+  - `2026-11-13`
+  - Complete game generation requires agents to coordinate rules, interactions, states, and presentation over a long development process. A single aggregate score obscures which capabilities are implemented and which requirements remain unmet. We present OCTAVE, a benchmark for compl…
+
+- **[Learn then Bet: Learning Interpretable Rules for Reliable Agent Intervention](https://arxiv.org/abs/2611.17662v1)**
+  - *You-Lin Chen, Xinyi Lisa Chen, Pedro Herrero-Vidal et al.*
+  - `2026-11-13`
+  - Autonomous agents now run for hundreds of steps with little or no human supervision. In practice, practitioners use runtime monitors such as turn limits and keyword filters to decide when a run should be stopped, upgraded, or assisted. However, these heuristics may stop runs that…
+
+- **[What LLM Agents See and What Users Say](https://arxiv.org/abs/2611.17639v1)**
+  - *Yue Zhao, Angela Huyue Zhang, S. Alex Yang et al.*
+  - `2026-11-13`
+  - Before an LLM agent cancels a reservation or deletes a folder for a user, what stops it from acting on a false assumption: what its tools show, or what the user says? In this work, we study this gap with presupposition theory from linguistics: an agent may act only if each claim…
+
+- **[Generated Evaluation Suites as Diversity-Driven Search for Real Agent Regressions](https://arxiv.org/abs/2611.17632v1)**
+  - *Pulkit Yadav*
+  - `2026-11-13`
+  - Generating an evaluation suite from an agent's specification is diversity-driven search: a generator fills a descriptor space (requirements $\times$ personas $\times$ scenario kinds), and the suite it emits is an archive, then scored like a benchmark by its mean pass rate, which…
+
+- **[More Agents, More Samples, or More Thinking? Untangling Coordination, Ensembling, and Test-Time Compute in Multi-Agent LLMs](https://arxiv.org/abs/2611.17610v1)**
+  - *Seyed Mahmoud Sajjadi Mohammadabadi*
+  - `2026-11-13`
+  - Evaluations of multi-agent language models often compare communicating architectures against a single greedy pass. This practice confounds coordination with sample multiplicity and inference compute. We synthesize nine primary empirical evaluations comprising 516 unique multi-age…
+
+- **[Training Reasoning Models in Simulation to Natively Use Real Robots](https://arxiv.org/abs/2611.18562v1)**
+  - *Jiaming Tang, Zhuoyang Zhang, Junxian Guo et al.*
+  - `2026-11-13`
+  - Robot-use agents (RUAs) have emerged as a promising approach to general-purpose robot control. However, strong performance has so far been achieved only by frontier proprietary models such as GPT-6 Astra and Claude Fable 5.2, whereas open-weight models remain substantially less c…
+
+- **[StreamEmbed: Real-Time Indexing from Pixels for Screenshot Retrieval](https://arxiv.org/abs/2611.18516v1)**
+  - *Dayoon Ko, Yichuan Wang, Soyeong Jeong et al.*
+  - `2026-11-13`
+  - Screen history can serve as searchable visual memory for people and agents, but unlike an offline corpus, it must be encoded and indexed as each screenshot arrives. OCR-based indexing is fast but loses visual information; visual encoding takes over two seconds. Yet screens change…
+
+- **[Callo: Serving Cache-Miss Requests with Speculative Decoding on Invalidated KV under Prefill-Decode Disaggregation](https://arxiv.org/abs/2611.18459v1)**
+  - *Jianjun Ou, Matthew Lentz*
+  - `2026-11-13`
+  - Agent sessions may involve frequent context edits, which effectively invalidate cached KV state and force requests to wait for re-prefill before decoding. We present Callo, a disaggregated serving system that leverages invalidated KV for speculative drafts to reduce this latency,…
+
+- **[NeoResearch: Literature- and Experience-Guided Autonomous Time Series Model Discovery](https://arxiv.org/abs/2611.18235v1)**
+  - *Ze Guo, Mingyue Cheng, Xiaoyu Tao et al.*
+  - `2026-11-13`
+  - Developing effective forecasting models for diverse time-series domains requires substantial expert knowledge, evidence from scientific literature on the web, and iterative experimentation. However, translating this knowledge and research experience into model designs requires pr…
+
+- **[Beyond Bot Labels: Retrospective Consequence-Grounded Ranking of Attributed Cache Harm in E-Commerce Logs](https://arxiv.org/abs/2611.18027v1)**
+  - *Jisoo Kim, Youngwoo Seo, Seonghoon Jeong*
+  - `2026-11-13`
+  - Web caches reduce origin load and latency, but automated traffic can either warm them or evict objects shoppers reuse, lowering the cache hit ratio (CHR). Existing bot defenses generally infer automation from User-Agent (UA) strings or behavior rather than identify sessions that…
+
+- **[Algorithmic Opacity as a Principal-Agent Problem](https://arxiv.org/abs/2611.17980v1)**
+  - *Ignacio Cofone, Katherine J. Strandburg*
+  - `2026-11-13`
+  - Concerns about gaming and trade secrecy, frequently invoked to justify algorithmic opacity, can also mask self-serving strategic behavior by decision-makers, who may prioritize private benefits over social welfare. We develop a principal-agent test for when algorithmic decision-m…
+
+- **[Agentic induction of common data elements and information extraction from sarcoma case report abstracts](https://arxiv.org/abs/2611.18506v1)**
+  - *Daniel Reichenpfader, Kwaku Appiagyei, Manovah Nadarajah et al.*
+  - `2026-11-13`
+  - Common data elements (CDEs) support clinical data comparability but are usually defined manually. We investigated whether large language model agents could derive a CDE schema from sarcoma case report abstracts and apply it at scale. An agent proposed 72,909 candidate CDEs from 2…
+
+- **[Agent-as-a-Judge](https://arxiv.org/abs/2611.18067v1)**
+  - *Runyang You, Hongru Cai, Caiqi Zhang et al.*
+  - `2026-11-13`
+  - Artificial intelligence has progressed from task-specific systems toward general models spanning perception, generation, reasoning, and autonomous interaction, making reliable evaluation essential for comparison, deployment, and post-training feedback. At scale, modern evaluation…
+
+- **[FEND: Far-End Detection in Outbound Voice AI Calls](https://arxiv.org/abs/2611.18050v1)**
+  - *Abhishek Kumar, Suraj Agrawal, Aashraya Sachdeva*
+  - `2026-11-13`
+  - When a conversational Voice AI agent places an outbound call, the far end may be a live person, a voicemail greeting, an interactive voice response (IVR) system, or increasingly another AI system answering on the callee's behalf. Standard Answering Machine Detection (AMD) reports…
+
+- **[RAG-FGO: Dynamic Optimization of Query-Rewriting Agents for Generative RAG](https://arxiv.org/abs/2611.17788v1)**
+  - *Qigan Sun, Xudong Wang, Chaoning Zhang et al.*
+  - `2026-11-13`
+  - In retrieval-augmented generation (RAG), query rewriting serves as a core interface that aligns user intent with external knowledge bases, and its effectiveness directly determines overall system performance. However, generative retrieval faces three critical challenges in real-w…
+
+- **[When Should a Virtual Patient Ask? RISP-Guided Proactive Information Seeking in Multi-Agent Patient Simulation](https://arxiv.org/abs/2611.18183v1)**
+  - *Jingyao Cai, Shuaijun Liu, Abdul Rehman et al.*
+  - `2026-11-13`
+  - Virtual patient (VP) systems support nursing communication training by providing simulated encounters in which learners practise explaining care and responding to patient concerns. Although large language models (LLMs) support flexible dialogue, current approaches give less expli…
+
+- **[ARCHER: From Rationale Imitation to Executable Reasoning in Small Language Models](https://arxiv.org/abs/2611.18494v1)**
+  - *Dhruv Dixit, Khushi Patel, Congcong Xu et al.*
+  - `2026-11-13`
+  - Small language models are attractive for local, low-cost, and privacy-sensitive deployment, but they remain unreliable on mathematical reasoning tasks that require decomposition, exact computation, tool use, and verification. We introduce \textbf{ARCHER}: \textbf{A}ction-trace \t…
 
 
-## Harness  (61)
+## Harness  (83)
+
+### NeurIPS
+
+- **[From Guidelines to Guarantees: A Graph-Based Evaluation Harness for Domain-Specific Evaluation of LLMs](https://openreview.net/forum?id=9Y10aBDIlj)**
+  - *Jessica M. Lundin, Usman Nasir Nakakana, Guillaume Chabot-Couture*
+  - **NeurIPS 2025** · OpenReview · `2026-03-20`
+  - Rigorous evaluation of domain-specific language models requires benchmarks that are comprehensive, contamination-resistant, and maintainable. Static, manually curated datasets do not satisfy these properties. We present a graph-based evaluation harness that transforms structured…
+
 
 ### ICML
 
@@ -762,23 +1226,148 @@ Evaluating these routing systems is important yet inherently challenging due…
   - **ICML 2025** · OpenReview · `2016-01-01`
   - Numerous auto-scaling strategies have been proposed in the past few years for improving various Quality of Service (QoS) indicators of cloud applications, for example, response time and throughput, by adapting the amount of resources assigned to the application to meet the worklo…
 
+- **[R-Bench: Graduate-level Multi-disciplinary Benchmarks for LLM & MLLM Complex Reasoning Evaluation](https://arxiv.org/abs/2505.02018)**
+  - *Meng-Hao Guo, Jia-Jun Xu, Yi Zhang et al.*
+  - **ICML 2025** · `2025-05-04`
+  - Reasoning stands as a cornerstone of intelligence, enabling the synthesis of existing knowledge to solve complex problems. Despite remarkable progress, existing reasoning benchmarks often fail to rigorously evaluate the nuanced reasoning capabilities required for complex, real-wo…
+
 
 ### ICLR
 
-- **[From Guidelines to Guarantees: A Graph-Based Evaluation Harness for Domain-Specific Evaluation of LLMs](https://openreview.net/forum?id=9Y10aBDIlj)**
-  - *Jessica M. Lundin, Usman Nasir Nakakana, Guillaume Chabot-Couture*
-  - **ICLR 2026** · OpenReview · `2026-03-20`
-  - Rigorous evaluation of domain-specific language models requires benchmarks that are comprehensive, contamination-resistant, and maintainable. Static, manually curated datasets do not satisfy these properties. We present a graph-based evaluation harness that transforms structured…
+- **[RefineBench: Evaluating Refinement Capability of Language Models via Checklists](https://arxiv.org/abs/2511.22173)**
+  - *Young-Jun Lee, Seungone Kim, Byung-Kwan Lee et al.*
+  - **ICLR 2025** · `2025-11-27`
+  - Can language models (LMs) self-refine their own responses? This question is increasingly relevant as a wide range of real-world user interactions involve refinement requests. However, prior studies have largely tested LMs'refinement abilities on verifiable tasks such as competiti…
+
+- **[Towards Reliable Benchmarking: A Contamination Free, Controllable Evaluation Framework for Multi-step LLM Function Calling](https://arxiv.org/abs/2509.26553)**
+  - *Seiji Maekawa, Jackson Hassell, Pouya Pezeshkpour et al.*
+  - **ICLR 2025** · `2025-09-30`
+  - Existing benchmarks for tool-augmented language models (TaLMs) lack fine-grained control over task difficulty and remain vulnerable to data contamination. We present FuncBenchGen, a unified, contamination-free framework that evaluates TaLMs by generating synthetic multi-step tool…
+
+
+### ACL
+
+- **[AutoMedEval: Harnessing Language Models for Automatic Medical Capability Evaluation](https://arxiv.org/abs/2505.11887)**
+  - *Xiechi Zhang, Zetian Ouyang, Lin-Lin Wang et al.*
+  - **ACL 2025** · `2025-05-17`
+  - With the proliferation of large language models (LLMs) in the medical domain, there is increasing demand for improved evaluation techniques to assess their capabilities. However, traditional metrics like F1 and ROUGE, which rely on token overlaps to measure quality, significantly…
+
+- **[ChartEdit: How Far Are MLLMs From Automating Chart Analysis? Evaluating MLLMs' Capability via Chart Editing](https://arxiv.org/abs/2505.11935)**
+  - *Xuanle Zhao, Xue-Xin Liu, Haoyue Yang et al.*
+  - **ACL 2025** · `2025-05-17`
+  - Although multimodal large language models (MLLMs) show promise in generating chart rendering code, editing charts via code presents a greater challenge. This task demands MLLMs to integrate chart understanding and reasoning capacities, which are labor-intensive. While many MLLMs…
+
+- **[MultiChallenge: A Realistic Multi-Turn Conversation Evaluation Benchmark Challenging to Frontier LLMs](https://arxiv.org/abs/2501.17399)**
+  - *Kaustubh Deshpande, Ved Sirdeshmukh, Johannes Mols et al.*
+  - **ACL 2025** · `2025-01-29`
+  - We present MultiChallenge, a pioneering benchmark evaluating large language models (LLMs) on conducting multi-turn conversations with human users, a crucial yet underexamined capability for their applications. MultiChallenge identifies four categories of challenges in multi-turn…
+
+
+### EMNLP
+
+- **[CompassVerifier: A Unified and Robust Verifier for LLMs Evaluation and Outcome Reward](https://arxiv.org/abs/2508.03686)**
+  - *Shudong Liu, Hongwei Liu, Jun-Nan Liu et al.*
+  - **EMNLP 2025** · `2025-08-05`
+  - Answer verification is crucial not only for evaluating large language models (LLMs) by matching their unstructured outputs against standard answers, but also serves as the reward model to guide LLM optimization. Most evaluation frameworks rely on regularized matching or employ ge…
 
 
 ### Other / arXiv
 
-- **[PhysLoop: Harnessing LLMs' Physics Awareness for Self-Improving Video Generation Models](https://arxiv.org/abs/2611.16748)**
-  - *Yuxuan Chen, Xiaojie Li, Hao Chen et al.*
-  - 🤗 Featured · `2026-11-12`
+- **[Envisioning Agentic Robotics: A New Era of Robotic Systems](https://arxiv.org/abs/2611.18359)**
+  - *Grid Robotics, Qingfeng Lan, Duo Li et al.*
+  - 🤗 Featured · `2026-11-13`
+  - The release of GPT-6 Astra marks the emergence of a new paradigm in robotics: agentic robotics. Within weeks, frontier models with agentic harnesses matched or exceeded task-specific policies on many embodied benchmarks. Instead of training a dedicated policy for each family of t…
+
+- **[G-CAST: Governed Continual Self-Training for E-Commerce Agents under Evolving Demands](https://arxiv.org/abs/2611.17814)**
+  - *Yuechun Yu, Wenzheng Kong, Xiaofeng Mao et al.*
+  - 🤗 Featured · `2026-11-13`
+  - With the rapid advancement of Large Language Models (LLMs), an increasing number of users are turning to LLM-powered agents for conversational shopping in e-commerce. However, the user needs continue to change as new product categories, procurement scenarios, and feature requests…
+
+- **[Vision-as-a-Tool: Visual Harness for Multimodal Agentic Coding](https://arxiv.org/abs/2611.17797)**
+  - *Haolin Yang, Wenshan Wu, Jin Jiang et al.*
+  - 🤗 · `2026-11-13`
+  - Multimodal agentic coding requires robust visual reasoning to analyze observations and evaluate generated artifacts. Current frameworks largely rely on a Thinking-with-Images paradigm, where agents depend on their intrinsic vision to execute visually grounded tasks. However, this…
+
+- **[AscendGYM: A Cost-Aware Kernel Optimization Benchmark for Real-World Workloads on Ascend NPUs](https://arxiv.org/abs/2611.17621)**
+  - *AI Training Platform Team, Bingwei Zhang, Jing Li et al.*
+  - 🤗 · `2026-11-13`
+  - Kernel optimization is essential for efficient large language model (LLM) training and inference on Ascend NPUs. Existing Ascend kernel benchmarks primarily focus on kernel generation, with less emphasis on the ability of agents to optimize existing implementations under input co…
+
+- **[WeightBench: Evaluating Language Models as Weight-Space Programmers](https://arxiv.org/abs/2611.18553v1)**
+  - *Aayush Marasini, Barsat Khadka, Nick Rahimi*
+  - `2026-11-13`
+  - Recent work shows that large language models (LLMs) can operate directly on the parameters of other neural networks. They can read what a network was trained to do, fix a network that fails, and write working networks from scratch, all without gradient descent. This capability ha…
+
+- **[ModHarness-RL: Recasting Harnesses as Learnable and Evolving Programs for Agentic RL](https://arxiv.org/abs/2611.18533v1)**
+  - *Zelin He, Siyu Zhu, Jacob Helwig et al.*
+  - `2026-11-13`
+  - Agentic reinforcement learning (RL) increasingly relies on a harness, the scaffold around the model that decides what it sees of its own interaction and what guidance it receives. Most existing approaches train under a hand-written harness that stays fixed throughout. However, an…
+
+- **[Do Verifier Judgments Survive Abstraction? Measuring Verification Transport for LLM Agent Evaluation](https://arxiv.org/abs/2611.18471v1)**
+  - *Disha Sheshanarayana, Sai Linisha Reddy Goli*
+  - `2026-11-13`
+  - LLM-based verifiers are increasingly used to evaluate agent executions, but their reliability is typically measured under a single representation of the trajectory. In deployed agent systems, the same execution may be exposed through composed tools, delegation boundaries, or comp…
+
+- **[PrivacyPR: A Dataset of Real-World Privacy Fixes for Benchmarking Privacy-Aware Code Review](https://arxiv.org/abs/2611.18293v1)**
+  - *Hua Yang, Aditya Bhardwaj, Shidong Pan et al.*
+  - `2026-11-13`
+  - Coding agents increasingly review code, yet whether they catch the privacy defects that laws such as the GDPR require software to avoid remains largely untested, partly because few datasets connect real privacy defects to their accepted fixes and review context. We present Privac…
+
+- **[From Images to Grounded Edits: A Real-World Benchmark for Chinese Grammatical Error Correction in Handwritten Essays](https://arxiv.org/abs/2611.17966v1)**
+  - *Weiru Zhang, Yuzhong Hong, Junwei Bao et al.*
+  - `2026-11-13`
+  - Chinese Grammatical Error Correction (CGEC) is typically formulated as a text-to-text problem. While suitable for digital texts, this formulation falls short in real-world K-12 education, where AI-assisted corrections are expected directly on essay images, which are primarily han…
+
+- **[GDP.xlsx: Benchmarking Frontier Models on Professional Workbooks](https://arxiv.org/abs/2611.17766v1)**
+  - *Suhaas Garre, Sushant Mehta, Edwin Chen*
+  - `2026-11-13`
+  - We introduce GDP_xlsx, a benchmark of 70 realistic workplace requests written by professionals in 13 domains, each paired with an expert rubric of binary criteria and with the complete workbook or CSV file it refers to. Together the files hold 2.18 million populated cells, and th…
+
+- **[Co-Sight Harness: Externalized Control Assets and Deterministic Enforcement for Long-Horizon Business Agents](https://arxiv.org/abs/2611.17696v1)**
+  - *Luyao Wang, Xijun Zhu, Zhaohui Hao et al.*
+  - `2026-11-13`
+  - Long-horizon business workflows fail in two ways: errors accumulate as a chain of activities lengthens, and the knowledge an activity needs is written in a different vocabulary from the user's request. We study whether such workflows can be made reliable without changing the lang…
+
+- **[OCTAVE: A Capability-Resolved Benchmark for End-to-End HTML5 Game Generation](https://arxiv.org/abs/2611.17681v1)**
+  - *Kehang Li, Xinlan Xu, Yulin Jin et al.*
+  - `2026-11-13`
+  - Complete game generation requires agents to coordinate rules, interactions, states, and presentation over a long development process. A single aggregate score obscures which capabilities are implemented and which requirements remain unmet. We present OCTAVE, a benchmark for compl…
+
+- **[Generated Evaluation Suites as Diversity-Driven Search for Real Agent Regressions](https://arxiv.org/abs/2611.17632v1)**
+  - *Pulkit Yadav*
+  - `2026-11-13`
+  - Generating an evaluation suite from an agent's specification is diversity-driven search: a generator fills a descriptor space (requirements $\times$ personas $\times$ scenario kinds), and the suite it emits is an archive, then scored like a benchmark by its mean pass rate, which…
+
+- **[Training Reasoning Models in Simulation to Natively Use Real Robots](https://arxiv.org/abs/2611.18562v1)**
+  - *Jiaming Tang, Zhuoyang Zhang, Junxian Guo et al.*
+  - `2026-11-13`
+  - Robot-use agents (RUAs) have emerged as a promising approach to general-purpose robot control. However, strong performance has so far been achieved only by frontier proprietary models such as GPT-6 Astra and Claude Fable 5.2, whereas open-weight models remain substantially less c…
+
+- **[Efficient and Practical Clustering of Variables in Causal Graphs](https://arxiv.org/abs/2611.17971v1)**
+  - *Otto Tabell, Jani Nykänen, Santtu Tikka et al.*
+  - `2026-11-13`
+  - Clustering variables in a graph may improve visual clarity and simplify causal inference. Harnessing the full potential of clustering requires an automated method to detect useful clusters in a graph. We introduce a novel class of clusters called conduits, and present a sound, co…
+
+- **[Evaluating Feedback-Driven Black-Box Processes via Stochastic Modeling and Simulation](https://arxiv.org/abs/2611.18477v1)**
+  - *Mengfan Xu, Zirui Liu, Juan Zhai et al.*
+  - `2026-11-13`
+  - We study feedback-driven black-box processes across software engineering and machine learning. These processes are inherently sequential: policies generate inputs, observe outputs/feedback from systems, and use the feedback to guide the design of subsequent inputs. While many pol…
 
 
-## Finance  (102)
+## Finance  (118)
+
+### AAAI
+
+- **[Can We Trust AI Benchmarks? An Interdisciplinary Review of Current Issues in AI Evaluation](https://arxiv.org/abs/2502.06559)**
+  - *Maria Eriksson, Erasmo Purificato, Arman Noroozian et al.*
+  - **AAAI 2025** · `2025-02-10`
+  - Quantitative Artificial Intelligence (AI) Benchmarks have
+emerged as fundamental tools for evaluating the
+performance, capability, and safety of AI models and
+systems. Currently, they shape the direction of AI
+development and are playing an increasingly prominent role
+in regulato…
+
 
 ### ICML
 
@@ -1292,5 +1881,86 @@ Due to disintermediation, these marketplaces trade off increased privacy for hig
   - This paper describes an approach to fraud detection targeted at applications where this task is followed by a posterior human analysis of the signaled frauds. This is a frequent setup on fraud detection applications (e.g. credit card misuse, telecom fraud, etc.). In real world ap…
 
 
+### ACL
+
+- **[FinMME: Benchmark Dataset for Financial Multi-Modal Reasoning Evaluation](https://arxiv.org/abs/2505.24714)**
+  - *Junyu Luo, Zhi-Zhuo Kou, Liming Yang et al.*
+  - **ACL 2025** · `2025-05-30`
+  - Multimodal Large Language Models (MLLMs) have experienced rapid development in recent years. However, in the financial domain, there is a notable lack of effective and specialized multimodal evaluation datasets. To advance the development of MLLMs in the finance domain, we introd…
+
+- **[Meta-Tool: Unleash Open-World Function Calling Capabilities of General-Purpose Large Language Models](https://aclanthology.org/2025.acl-long.1481.pdf)**
+  - *Sheng-Qian Qin, Ya-Kun Zhu, Lin-Jie Mu et al.*
+  - **ACL 2025**
+  - Large language models (LLMs) have show-cased remarkable capabilities as autonomous agents when augmented with external tools. Equipped with fixed tool sets, LLMs struggle with addressing diverse user inquiries in open-world tasks. To evaluate and boost the performance of LLMs in…
+
+
+### Other / arXiv
+
+- **[Envisioning Agentic Robotics: A New Era of Robotic Systems](https://arxiv.org/abs/2611.18359)**
+  - *Grid Robotics, Qingfeng Lan, Duo Li et al.*
+  - 🤗 Featured · `2026-11-13`
+  - The release of GPT-6 Astra marks the emergence of a new paradigm in robotics: agentic robotics. Within weeks, frontier models with agentic harnesses matched or exceeded task-specific policies on many embodied benchmarks. Instead of training a dedicated policy for each family of t…
+
+- **[JFinBench: A Continuously Refreshable Japanese Financial Benchmark from the Latest Certification Exams](https://arxiv.org/abs/2611.18130)**
+  - *Issa Sugiura, Taro Makino, Takashi Ishida*
+  - 🤗 Featured · `2026-11-13`
+  - Large language models (LLMs) are increasingly applied to finance, creating a need for benchmarks that evaluate their capabilities across financial systems with different regulations and practices. However, existing financial benchmarks provide limited coverage of country-specific…
+
+- **[Aligned, Conflicting, or Unspecified? A Diagnostic Benchmark for Multimodal Time Series Forecasting](https://arxiv.org/abs/2611.17680)**
+  - *Xintong Wang, Haihan Nan, Ruidong Li*
+  - 🤗 · `2026-11-13`
+  - Artificial Intelligence of Things (AIoT) systems increasingly combine sensed time series with external text such as expert reports and news, yet how reliably models use text that agrees or conflicts with the sensed history remains unclear. We introduce the first real-world diagno…
+
+- **[Agentic AI for Discovering Fault-Tolerant Quantum Circuits](https://arxiv.org/abs/2611.18504v1)**
+  - *Aritra Lahiri, Florian Marquardt*
+  - `2026-11-13`
+  - Scaling quantum computing toward practical quantum advantage is currently limited by the efficiency of circuits that operate on information encoded by quantum error-correcting codes. The full stack of quantum computing encompasses several tasks: preparation of logical code states…
+
+- **[TradeGauntlet: Evaluating Compliance Controls for Autonomous Trading Agents](https://arxiv.org/abs/2611.18493v1)**
+  - *Sandip Nandi, Aishwarya Bose, Apurba Bose et al.*
+  - `2026-11-13`
+  - Autonomous trading agents need controls that prevent problematic orders without making legitimate tasks impractical. We study this aspect of agentic compliance with TradeGauntlet, a replayable limit-order-book simulator that separates detection, prevention, and execution cost. In…
+
+- **[Who Should Be on the Panel? Task-Conditioned Persona Selection for LLM Trading Agents](https://arxiv.org/abs/2611.18150v1)**
+  - *Boming Yang, Yuquan Wang, Jiaxian Guo et al.*
+  - `2026-11-13`
+  - Multi-agent LLM systems are built by fixing a cast of roles and then designing how the cast coordinates. Which agents should make up the group for a given task is left to the designer, and the same cast is reused for every task. Financial trading makes the cost of that choice vis…
+
+- **[Do Machines Learn Deviance From Their Peers? A Randomized Test of Differential Association With AI Agents](https://arxiv.org/abs/2611.18098v1)**
+  - *Murat Ozer, Arif Akgul, Amitabh Chakravorty*
+  - `2026-11-13`
+  - Differential association theory and its extension, social learning theory, hold that rule-breaking, and the definitions that make it acceptable, are learned through interaction with others. Because people choose their friends, this claim has been hard to test. We addressed this s…
+
+- **[Can You Trust Your Finance Agent? Drift, Diagnosis and Auditable Intervention on One Shipped Financial Research Agent](https://arxiv.org/abs/2611.17939v1)**
+  - *Cosimo Galeone, Anna Ettorre, Ginevra Mariani et al.*
+  - `2026-11-13`
+  - Can you trust a finance agent you did not build? We take the reference agent shipped with the Vals Finance Agent Benchmark v2, leave it untuned, and ask four questions a leaderboard score does not answer. Is the score stable? Seven identical runs on 18 questions pass between 105…
+
+- **[Adversarially Attacking Symbolic Vocabulary Vulnerabilities In LLM Planners](https://arxiv.org/abs/2611.17910v1)**
+  - *Stephen Obadinma, Xiaodan Zhu*
+  - `2026-11-13`
+  - As large language models (LLMs) are increasingly deployed as autonomous agents, their abilities in navigating automated planning tasks have become essential. However, despite their strengths, LLMs' planning ability is not robust, particularly when they are not allowed to exploit…
+
+- **[Co-Sight Harness: Externalized Control Assets and Deterministic Enforcement for Long-Horizon Business Agents](https://arxiv.org/abs/2611.17696v1)**
+  - *Luyao Wang, Xijun Zhu, Zhaohui Hao et al.*
+  - `2026-11-13`
+  - Long-horizon business workflows fail in two ways: errors accumulate as a chain of activities lengthens, and the knowledge an activity needs is written in a different vocabulary from the user's request. We study whether such workflows can be made reliable without changing the lang…
+
+- **[Agentic induction of common data elements and information extraction from sarcoma case report abstracts](https://arxiv.org/abs/2611.18506v1)**
+  - *Daniel Reichenpfader, Kwaku Appiagyei, Manovah Nadarajah et al.*
+  - `2026-11-13`
+  - Common data elements (CDEs) support clinical data comparability but are usually defined manually. We investigated whether large language model agents could derive a CDE schema from sarcoma case report abstracts and apply it at scale. An agent proposed 72,909 candidate CDEs from 2…
+
+- **[Agent-as-a-Judge](https://arxiv.org/abs/2611.18067v1)**
+  - *Runyang You, Hongru Cai, Caiqi Zhang et al.*
+  - `2026-11-13`
+  - Artificial intelligence has progressed from task-specific systems toward general models spanning perception, generation, reasoning, and autonomous interaction, making reliable evaluation essential for comparison, deployment, and post-training feedback. At scale, modern evaluation…
+
+- **[ParetoM$^3$: Learning on the Pareto Set under Preference Guidance via Min-Max-Min Optimization](https://arxiv.org/abs/2611.18252v1)**
+  - *Pei Tang, Songtao Lu*
+  - `2026-11-13`
+  - Learning across multiple inherently conflicting objectives requires selecting desirable trade-offs from the Pareto set. In this work, we study preference-guided multi-objective optimization, where a predefined preference function is minimized over the weak Pareto set of multiple…
+
+
 ---
-*Generated 2026-11-15 · Sources: HuggingFace Daily Papers, OpenReview, Semantic Scholar, arXiv*
+*Generated 2026-11-16 · Sources: HuggingFace Daily Papers, OpenReview, Semantic Scholar, arXiv*
