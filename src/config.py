@@ -196,5 +196,6 @@ SS_FIELDS = (
     "openAccessPdf,publicationDate,url"
 )
 
-# How far back (days) to look when querying Semantic Scholar / arXiv
+# Inclusive recent-publication window and arXiv discovery lookback.
+# S2/OpenReview retain a broad discovery search; src.audit applies recency.
 LOOKBACK_DAYS = 3
