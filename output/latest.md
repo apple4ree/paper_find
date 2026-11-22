@@ -1,85 +1,14 @@
-# Daily Paper Digest — 2026-11-21 (Saturday)
+# Daily Paper Digest — 2026-11-22 (Sunday)
 
 | Source | Topics |
 |--------|--------|
 | AAAI · NeurIPS · ICML · ICLR · CVPR · KDD · ACL · EMNLP · NAACL · IJCAI · HuggingFace · OpenReview | Agent · Harness · Finance |
 
-**250 unique papers** (312 topic-entries — cross-topic papers counted once per category)
+**196 unique papers** (247 topic-entries — cross-topic papers counted once per category)
 
 ---
 
-## Agent  (142)
-
-### AAAI
-
-- **[Two Heads are Better than One: Distilling Large Language Model Features Into Small Models with Feature Decomposition and Mixture](https://arxiv.org/abs/2511.07110)**
-  - *Tian-Hao Fu, Xin-Xin Xu, Weichen Xu et al.*
-  - **AAAI 2025** · `2025-11-10`
-  - Market making (MM) through Reinforcement Learning (RL) has attracted significant attention in financial trading. With the development of Large Language Models (LLMs), more and more attempts are being made to apply LLMs to financial areas. A simple, direct application of LLM as an…
-
-- **[AgentSwift: Efficient LLM Agent Design via Value-guided Hierarchical Search](https://arxiv.org/abs/2506.06017)**
-  - *Yu Li, Lehui Li, Zhi-Hao Wu et al.*
-  - **AAAI 2025** · `2025-06-06`
-  - Large language model (LLM) agents have demonstrated strong capabilities across diverse domains, yet automated agent design remains a significant challenge. Current automated agent design approaches are often constrained by limited search spaces that primarily optimize workflows b…
-
-- **[Exploring the Efficacy of Multi-Agent Reinforcement Learning for Autonomous Cyber Defence: A CAGE Challenge 4 Perspective](https://doi.org/10.1609/aaai.v39i28.35158)**
-  - *Mitchell Kiely, Metin B. Ahiskali, E. Borde et al.*
-  - **AAAI 2025** · `2025-04-11`
-  - As cyber threats become increasingly automated and sophisticated, novel solutions must be introduced to improve defence of enterprise networks. Deep Reinforcement Learning (DRL) has demonstrated potential in mitigating these advanced threats. Single DRL Agents have proven utility…
-
-- **[OpenDriveVLA: Towards End-to-end Autonomous Driving with Large Vision Language Action Model](https://arxiv.org/abs/2503.23463)**
-  - *Xingcheng Zhou, Xu Han, Feng Yang et al.*
-  - **AAAI 2025** · `2025-03-30`
-  - We present OpenDriveVLA, a Vision-Language Action (VLA) model designed for end-to-end autonomous driving, built upon open-source large language models. OpenDriveVLA generates spatially-grounded driving actions by leveraging multimodal inputs, including both 2D and 3D instance-awa…
-
-- **[TimeCAP: Learning to Contextualize, Augment, and Predict Time Series Events with Large Language Model Agents](https://arxiv.org/abs/2502.11418)**
-  - *Ge-On Lee, Wen-Chao Yu, Kijung Shin et al.*
-  - **AAAI 2025** · `2025-02-17`
-  - Time series data is essential in various applications, including climate modeling, healthcare monitoring, and financial analytics. Understanding the contextual information associated with real-world time series data is often essential for accurate and reliable event predictions.…
-
-
-### NeurIPS
-
-- **[WebDancer: Towards Autonomous Information Seeking Agency](https://arxiv.org/abs/2505.22648)**
-  - *Jia-Long Wu, Bai-Xuan Li, Run-Nan Fang et al.*
-  - **NeurIPS 2025** · `2025-05-28`
-  - Addressing intricate real-world problems necessitates in-depth information seeking and multi-step reasoning. Recent progress in agentic systems, exemplified by Deep Research, underscores the potential for autonomous multi-step research. In this work, we present a cohesive paradig…
-
-- **[STRATUS: A Multi-agent System for Autonomous Reliability Engineering of Modern Clouds](https://arxiv.org/abs/2506.02009)**
-  - *Yin-Fang Chen, Jia-Qi Pan, Jackson Clark et al.*
-  - **NeurIPS 2025** · `2025-05-27`
-  - In cloud-scale systems, failures are the norm. A distributed computing cluster exhibits hundreds of machine failures and thousands of disk failures; software bugs and misconfigurations are reported to be more frequent. The demand for autonomous, AI-driven reliability engineering…
-
-- **[AgentRecBench: Benchmarking LLM Agent-based Personalized Recommender Systems](https://arxiv.org/abs/2505.19623)**
-  - *Yu Shang, Peijie Liu, Yuwei Yan et al.*
-  - **NeurIPS 2025** · `2025-05-26`
-  - The emergence of agentic recommender systems powered by Large Language Models (LLMs) represents a paradigm shift in personalized recommendations, leveraging LLMs' advanced reasoning and role-playing capabilities to enable autonomous, adaptive decision-making. Unlike traditional r…
-
-- **[Distilling LLM Agent into Small Models with Retrieval and Code Tools](https://arxiv.org/abs/2505.17612)**
-  - *Minki Kang, Jongwon Jeong, Seanie Lee et al.*
-  - **NeurIPS 2025** · `2025-05-23`
-  - Large language models (LLMs) excel at complex reasoning tasks but remain computationally expensive, limiting their practical deployment. To address this, recent works have focused on distilling reasoning capabilities into smaller language models (sLMs) using chain-of-thought (CoT…
-
-- **[Group-in-Group Policy Optimization for LLM Agent Training](https://arxiv.org/abs/2505.10978)**
-  - *Lang Feng, Zheng-Hai Xue, Ting-Cong Liu et al.*
-  - **NeurIPS 2025** · `2025-05-16`
-  - Recent advances in group-based reinforcement learning (RL) have driven frontier large language models (LLMs) in single-turn tasks like mathematical reasoning. However, their scalability to multi-turn LLM agent training remains limited. Unlike static tasks, agent-environment inter…
-
-- **[Why Do Multi-Agent LLM Systems Fail?](https://arxiv.org/abs/2503.13657)**
-  - *Mert Cemri, Melissa Z. Pan, Shuyi Yang et al.*
-  - **NeurIPS 2025** · `2025-03-17`
-  - Despite enthusiasm for Multi-Agent LLM Systems (MAS), their performance gains on popular benchmarks are often minimal. This gap highlights a critical need for a principled understanding of why MAS fail. Addressing this question requires systematic identification and analysis of f…
-
-- **[AgentDAM: Privacy Leakage Evaluation for Autonomous Web Agents](https://arxiv.org/abs/2503.09780)**
-  - *A. Zharmagambetov, Chuan Guo, I. Evtimov et al.*
-  - **NeurIPS 2025** · `2025-03-12`
-  - Autonomous AI agents that can follow instructions and perform complex multi-step tasks have tremendous potential to boost human productivity. However, to perform many of these tasks, the agents need access to personal information from their users, raising the question of whether…
-
-- **[MobileUse: A Hierarchical Reflection-Driven GUI Agent for Autonomous Mobile Operation](https://www.semanticscholar.org/paper/d6515c1b4f75aca67449bc9b2f7045433c03d920)**
-  - *Ning Li, Xiang-Mou Qu, Jiamu Zhou et al.*
-  - **NeurIPS 2025**
-  - Recent advances in Multimodal Large Language Models (MLLMs) have enabled the development of mobile agents that can understand visual inputs and follow user instructions, unlocking new possibilities for automating complex tasks on mobile devices. However, applying these models to…
-
+## Agent  (93)
 
 ### ICML
 
@@ -181,11 +110,6 @@ come from. We evaluate Meta-Harness, Agentic H…
   - *Tongyan Hu, Xiaogeng Liu, Bryan Hooi et al.*
   - **ICML 2025** · OpenReview · `2026-06-05`
   - With the rapid development of Large Language Model (LLM) agents, these agents increasingly rely on skills—modular capabilities that combine natural language specifications with executable code across multiple modalities—to extend agent behavior at scale. As skills become a key me…
-
-- **[FairCoder: Probing LLM Bias in High-Stakes Decision Making via Coding Tasks](https://openreview.net/forum?id=n7Mk11IVX8)**
-  - *Yongkang Du, Jen-tse Huang, Jieyu Zhao et al.*
-  - **ICML 2025** · OpenReview · `2026-06-03`
-  - Large language models (LLMs) are increasingly used in high-stakes decisions such as hiring and college admissions, making their social bias a critical concern. While LLMs are trained to refuse explicitly biased requests, bias can be leaked implicitly during LLM planning and reaso…
 
 - **[Operational Reframing and Approval-Framed Delegation in Multi-Agent LLM Safety](https://openreview.net/forum?id=7UXZAFMvpZ)**
   - *Lifei Liu, Haoran Yu, Xiaochong Jiang et al.*
@@ -476,195 +400,6 @@ Furthermore…
   - **ICML 2025** · OpenReview · `2011-01-01`
   - Automated trading in electronic markets is one of the most common and consequential applications of autonomous software agents.
 
-- **[Which Agent Causes Task Failures and When? On Automated Failure Attribution of LLM Multi-Agent Systems](https://arxiv.org/abs/2505.00212)**
-  - *Shao-Kun Zhang, Ming Yin, Jie-Yu Zhang et al.*
-  - **ICML 2025** · `2025-04-30`
-  - Failure attribution in LLM multi-agent systems-identifying the agent and step responsible for task failures-provides crucial clues for systems debugging but remains underexplored and labor-intensive. In this paper, we propose and formulate a new research area: automated failure a…
-
-- **[OrcaLoca: An LLM Agent Framework for Software Issue Localization](https://arxiv.org/abs/2502.00350)**
-  - *Zhong-Ming Yu, He-Jia Zhang, Yu-Jie Zhao et al.*
-  - **ICML 2025** · `2025-02-01`
-  - Recent developments in Large Language Model (LLM) agents are revolutionizing Autonomous Software Engineering (ASE), enabling automated coding, problem fixes, and feature improvements. However, localization -- precisely identifying software problems by navigating to relevant code…
-
-- **[RepoAudit: An Autonomous LLM-Agent for Repository-Level Code Auditing](https://arxiv.org/abs/2501.18160)**
-  - *Jin-Yao Guo, Cheng-Peng Wang, Xiang-Zhe Xu et al.*
-  - **ICML 2025** · `2025-01-30`
-  - Code auditing is the process of reviewing code with the aim of identifying bugs. Large Language Models (LLMs) have demonstrated promising capabilities for this task without requiring compilation, while also supporting user-friendly customization. However, auditing a code reposito…
-
-
-### ICLR
-
-- **[MCP-SafetyBench: A Benchmark for Safety Evaluation of Large Language Models with Real-World MCP Servers](https://arxiv.org/abs/2512.15163)**
-  - *Xuan Zong, Zhiqi Shen, Lei Wang et al.*
-  - **ICLR 2025** · `2025-12-17`
-  - Large language models (LLMs) are evolving into agentic systems that reason, plan, and operate external tools. The Model Context Protocol (MCP) is a key enabler of this transition, offering a standardized interface for connecting LLMs with heterogeneous tools and services. Yet MCP…
-
-- **[Tree Search for LLM Agent Reinforcement Learning](https://arxiv.org/abs/2509.21240)**
-  - *Yuxiang Ji, Zi-Yu Ma, Yong Wang et al.*
-  - **ICLR 2025** · `2025-09-25`
-  - Recent advances in reinforcement learning (RL) have significantly enhanced the agentic capabilities of large language models (LLMs). In long-term and multi-turn agent tasks, existing approaches driven solely by outcome rewards often suffer from the problem of sparse supervision.…
-
-- **[MemAgent: Reshaping Long-Context LLM with Multi-Conv RL-based Memory Agent](https://arxiv.org/abs/2507.02259)**
-  - *Hong-Li Yu, Ting Chen, Jiang-Tao Feng et al.*
-  - **ICLR 2025** · `2025-07-03`
-  - Despite improvements by length extrapolation, efficient attention and memory modules, handling infinitely long documents with linear complexity without performance degradation during extrapolation remains the ultimate challenge in long-text processing. We directly optimize for lo…
-
-- **[DriveTransformer: Unified Transformer for Scalable End-to-End Autonomous Driving](https://arxiv.org/abs/2503.07656)**
-  - *Xiao-Song Jia, Jun-Qi You, Zhi-Yuan Zhang et al.*
-  - **ICLR 2025** · `2025-03-07`
-  - End-to-end autonomous driving (E2E-AD) has emerged as a trend in the field of autonomous driving, promising a data-driven, scalable approach to system design. However, existing E2E-AD methods usually adopt the sequential paradigm of perception-prediction-planning, which leads to…
-
-
-### CVPR
-
-- **[An LLM-Enabled Multi-Agent Autonomous Mechatronics Design Framework](https://arxiv.org/abs/2504.14681)**
-  - *Ze-Yu Wang, Frank P.-W. Lo, Qian Chen et al.*
-  - **CVPR 2025** · `2025-04-20`
-  - Existing LLM-enabled multi-agent frameworks are predominantly limited to digital or simulated environments and confined to narrowly focused knowledge domain, constraining their applicability to complex engineering tasks that require the design of physical embodiment, cross-discip…
-
-
-### ACL
-
-- **[From Storage to Experience: A Survey on the Evolution of LLM Agent Memory Mechanisms](https://arxiv.org/abs/2605.06716)**
-  - *Jing Luo, Yu-Chen Tian, Chu-Xue Cao et al.*
-  - **ACL 2026** · `2026-05-07`
-  - Large Language Model (LLM)-based agents have fundamentally reshaped artificial intelligence by integrating external tools and planning capabilities. While memory mechanisms have emerged as the architectural cornerstone of these systems, current research remains fragmented, oscill…
-
-- **[Lightweight LLM Agent Memory with Small Language Models](https://arxiv.org/abs/2604.07798)**
-  - *Jia-Quan Zhang, Chao-Ning Zhang, Shu-Xu Chen et al.*
-  - **ACL 2026** · `2026-04-09`
-  - Although LLM agents can leverage tools for complex tasks, they still need memory to maintain cross-turn consistency and accumulate reusable information in long-horizon interactions. However, retrieval-based external memory systems incur low online overhead but suffer from unstabl…
-
-- **[Your LLM Agent Can Leak Your Data: Data Exfiltration via Backdoored Tool Use](https://arxiv.org/abs/2604.05432)**
-  - *Wu-Yang Zhang, Shi-Chao Pei*
-  - **ACL 2026** · `2026-04-07`
-  - Tool-use large language model (LLM) agents are increasingly deployed to support sensitive workflows, relying on tool calls for retrieval, external API access, and session memory management. While prior research has examined various threats, the risk of systematic data exfiltratio…
-
-- **[Temp-R1: A Unified Autonomous Agent for Complex Temporal KGQA via Reverse Curriculum Reinforcement Learning](https://arxiv.org/abs/2601.18296)**
-  - *Zhaoyan Gong, Zhi-Qiang Liu, Song-Ze Li et al.*
-  - **ACL 2026** · `2026-01-26`
-  - Temporal Knowledge Graph Question Answering (TKGQA) is inherently challenging, as it requires sophisticated reasoning over dynamic facts with multi-hop dependencies and complex temporal constraints. Existing methods rely on fixed workflows and expensive closed-source APIs, limiti…
-
-- **[EnvScaler: Scaling Tool-Interactive Environments for LLM Agent via Programmatic Synthesis](https://arxiv.org/abs/2601.05808)**
-  - *Xiaoshuai Song, Hao Chang, Guan-Ting Dong et al.*
-  - **ACL 2026** · `2026-01-09`
-  - Large language models (LLMs) are expected to be trained to act as agents in various real-world environments, but this process relies on rich and varied tool-interaction sandboxes. However, access to real systems is often restricted; LLM-simulated environments are prone to halluci…
-
-- **[MobileWorld: Benchmarking Autonomous Mobile Agents in Agent-User Interactive and MCP-Augmented Environments](https://arxiv.org/abs/2512.19432)**
-  - *Qu-Yu Kong, Xu Zhang, Zhen-Yu Yang et al.*
-  - **ACL 2025** · `2025-12-22`
-  - Among existing online mobile-use benchmarks, AndroidWorld has emerged as the dominant benchmark due to its reproducible environment and deterministic evaluation; however, recent agents achieving over 90% success rates indicate its saturation and motivate the need for a more chall…
-
-- **[ToolScope: Enhancing LLM Agent Tool Use through Tool Merging and Context-Aware Filtering](https://arxiv.org/abs/2510.20036)**
-  - *Marianne Menglin Liu, Daniel García, Fjona Parllaku et al.*
-  - **ACL 2025** · `2025-10-22`
-  - Large language model (LLM) agents rely on external tools to solve complex tasks, but real-world toolsets often contain redundant tools with overlapping names and descriptions, introducing ambiguity and reducing selection accuracy. LLMs also face strict input context limits, preve…
-
-- **[Multi-Agent-as-Judge: Aligning LLM-Agent-Based Automated Evaluation with Multi-Dimensional Human Evaluation](https://arxiv.org/abs/2507.21028)**
-  - *Jia-Ju Chen, Yuxuan Lu, Xiaojie Wang et al.*
-  - **ACL 2025** · `2025-07-28`
-  - Nearly all human work is collaborative; thus, the evaluation of real-world NLP applications often requires multiple dimensions that align with diverse human perspectives. As real human evaluator resources are often scarce and costly, the emerging"LLM-as-a-judge"paradigm sheds lig…
-
-- **[GUI-explorer: Autonomous Exploration and Mining of Transition-aware Knowledge for GUI Agent](https://arxiv.org/abs/2505.16827)**
-  - *Bin Xie, Rui Shao, Gong-Wei Chen et al.*
-  - **ACL 2025** · `2025-05-22`
-  - GUI automation faces critical challenges in dynamic environments. MLLMs suffer from two key issues: misinterpreting UI components and outdated knowledge. Traditional fine-tuning methods are costly for app-specific knowledge updates. We propose GUI-explorer, a training-free GUI ag…
-
-- **[STeCa: Step-level Trajectory Calibration for LLM Agent Learning](https://arxiv.org/abs/2502.14276)**
-  - *Han-Lin Wang, Jian Wang, Chak Tou Leong et al.*
-  - **ACL 2025** · `2025-02-20`
-  - Large language model (LLM)-based agents have shown promise in tackling complex tasks by interacting dynamically with the environment. Existing work primarily focuses on behavior cloning from expert demonstrations or preference learning through exploratory trajectory sampling. How…
-
-- **[iAgent: LLM Agent as a Shield between User and Recommender Systems](https://arxiv.org/abs/2502.14662)**
-  - *Wujiang Xu, Yun-Xiao Shi, Zujie Liang et al.*
-  - **ACL 2025** · `2025-02-20`
-  - Traditional recommender systems usually take the user-platform paradigm, where users are directly exposed under the control of the platform's recommendation algorithms. However, the defect of recommendation algorithms may put users in very vulnerable positions under this paradigm…
-
-- **[Red-Teaming LLM Multi-Agent Systems via Communication Attacks](https://arxiv.org/abs/2502.14847)**
-  - *Peng-Fei He, Yu-Ping Lin, Shen Dong et al.*
-  - **ACL 2025** · `2025-02-20`
-  - Large Language Model-based Multi-Agent Systems (LLM-MAS) have revolutionized complex problem-solving capability by enabling sophisticated agent collaboration through message-based communications. While the communication framework is crucial for agent coordination, it also introdu…
-
-- **[Unveiling Privacy Risks in LLM Agent Memory](https://arxiv.org/abs/2502.13172)**
-  - *Bo Wang, Weiyi He, Sheng-Lai Zeng et al.*
-  - **ACL 2025** · `2025-02-17`
-  - Large Language Model (LLM) agents have become increasingly prevalent across various real-world applications. They enhance decision-making by storing private user-agent interactions in the memory module for demonstrations, introducing new privacy risks for LLM agents. In this work…
-
-- **[FLAG-Trader: Fusion LLM-Agent with Gradient-based Reinforcement Learning for Financial Trading](https://arxiv.org/abs/2502.11433)**
-  - *Guo-Jun Xiong, Zhiyang Deng, Ke-Yi Wang et al.*
-  - **ACL 2025** · `2025-02-17`
-  - Large language models (LLMs) fine-tuned on multimodal financial data have demonstrated impressive reasoning capabilities in various financial tasks. However, they often struggle with multi-step, goal-oriented scenarios in interactive financial markets, such as trading, where comp…
-
-- **[PaSa: An LLM Agent for Comprehensive Academic Paper Search](https://arxiv.org/abs/2501.10120)**
-  - *Yi-Cheng He, Guan-Hua Huang, Pei-Yuan Feng et al.*
-  - **ACL 2025** · `2025-01-17`
-  - We introduce PaSa, an advanced Paper Search agent powered by large language models. PaSa can autonomously make a series of decisions, including invoking search tools, reading papers, and selecting relevant references, to ultimately obtain comprehensive and accurate results for co…
-
-- **[Uncertainty Propagation on LLM Agent](https://aclanthology.org/2025.acl-long.302.pdf)**
-  - *Qi-Wei Zhao, Dong Li, Yan-Chi Liu et al.*
-  - **ACL 2025**
-
-
-### EMNLP
-
-- **[Self-Evolving World Models for LLM Agent Planning](https://arxiv.org/abs/2606.30639)**
-  - *X. Zhang, Wen-Xuan Zhang, See-Kiong Ng et al.*
-  - **EMNLP 2026** · `2026-06-29`
-  - World models offer a principled way to equip long-horizon LLM agents with foresight: predictions of action consequences before execution. However, unreliable foresight can be ignored, misused, or even degrade downstream decision-making. In this paper, we introduce WorldEvolver, a…
-
-- **[PaperScout: An Autonomous Agent for Academic Paper Search with Process-Aware Sequence-Level Policy Optimization](https://arxiv.org/abs/2601.10029)**
-  - *Ting-Yue Pan, Jie Ouyang, Ming-Yue Cheng et al.*
-  - **EMNLP 2026** · `2026-01-15`
-  - Academic paper search is a fundamental task in scientific research, yet most existing approaches organize retrieval around predefined workflows or structured interaction protocols that struggle with complex, conditional queries. To address this limitation, we propose PaperScout,…
-
-- **[Coarse-to-Fine Grounded Memory for LLM Agent Planning](https://arxiv.org/abs/2508.15305)**
-  - *Wei Yang, Jin-Wei Xiao, Hongming Zhang et al.*
-  - **EMNLP 2025** · `2025-08-21`
-  - Recent advancements in Large Language Models (LLMs) have driven growing interest in LLM-based agents for complex planning tasks. To avoid costly agent training, many studies adopted memory mechanism that enhances LLM with offline experiences or online trajectory analysis. However…
-
-- **[ECom-Bench: Can LLM Agent Resolve Real-World E-commerce Customer Support Issues?](https://arxiv.org/abs/2507.05639)**
-  - *Haoxin Wang, Xianhan Peng, H. Cheng et al.*
-  - **EMNLP 2025** · `2025-07-08`
-  - In this paper, we introduce ECom-Bench, the first benchmark framework for evaluating LLM agent with multimodal capabilities in the e-commerce customer support domain. ECom-Bench features dynamic user simulation based on persona information collected from real e-commerce customer…
-
-- **[LMR-BENCH: Evaluating LLM Agent's Ability on Reproducing Language Modeling Research](https://arxiv.org/abs/2506.17335)**
-  - *Shuo Yan, Ruochen Li, Ziming Luo et al.*
-  - **EMNLP 2025** · `2025-06-19`
-  - Large language model (LLM) agents have demonstrated remarkable potential in advancing scientific discovery. However, their capability in the fundamental yet crucial task of reproducing code from research papers, especially in the NLP domain, remains underexplored. This task inclu…
-
-- **[DatawiseAgent: A Notebook-Centric LLM Agent Framework for Adaptive and Robust Data Science Automation](https://arxiv.org/abs/2503.07044)**
-  - *Ziming You, Yumiao Zhang, De-Xuan Xu et al.*
-  - **EMNLP 2025** · `2025-03-10`
-  - Existing large language model (LLM) agents for automating data science show promise, but they remain constrained by narrow task scopes, limited generalization across tasks and models, and over-reliance on state-of-the-art (SOTA) LLMs. We introduce DatawiseAgent, a notebook-centri…
-
-- **[Multi-Agent Autonomous Driving Systems with Large Language Models: A Survey of Recent Advances](https://arxiv.org/abs/2502.16804)**
-  - *Yaozu Wu, Dong-Yuan Li, Yan-Kai Chen et al.*
-  - **EMNLP 2025** · `2025-02-24`
-  - Autonomous Driving Systems (ADSs) are revolutionizing transportation by reducing human intervention, improving operational efficiency, and enhancing safety. Large Language Models (LLMs) have been integrated into ADSs to support high-level decision-making through their powerful re…
-
-- **[CityEQA: A Hierarchical LLM Agent on Embodied Question Answering Benchmark in City Space](https://arxiv.org/abs/2502.12532)**
-  - *Yong Zhao, Kai Xu, Zheng-Qiu Zhu et al.*
-  - **EMNLP 2025** · `2025-02-18`
-  - Embodied Question Answering (EQA) has primarily focused on indoor environments, leaving the complexities of urban settings-spanning environment, action, and perception-largely unexplored. To bridge this gap, we introduce CityEQA, a new task where an embodied agent answers open-vo…
-
-- **[Agent Laboratory: Using LLM Agents as Research Assistants](https://arxiv.org/abs/2501.04227)**
-  - *Samuel Schmidgall, Yu-Sheng Su, Ze Wang et al.*
-  - **EMNLP 2025** · `2025-01-08`
-  - Historically, scientific discovery has been a lengthy and costly process, demanding substantial time and resources from initial conception to final results. To accelerate scientific discovery, reduce research costs, and improve research quality, we introduce Agent Laboratory, an…
-
-- **[AgentDiagnose: An Open Toolkit for Diagnosing LLM Agent Trajectories](https://aclanthology.org/2025.emnlp-demos.15.pdf)**
-  - *Tian-Yue Ou, Wan-Yao Guo, Apurva Gandhi et al.*
-  - **EMNLP 2025**
-  - ,
-
-
-### NAACL
-
-- **[CowPilot: A Framework for Autonomous and Human-Agent Collaborative Web Navigation](https://arxiv.org/abs/2501.16609)**
-  - *Faria Huq, Zora Zhiruo Wang, Frank F. Xu et al.*
-  - **NAACL 2025** · `2025-01-28`
-  - While much work on web agents emphasizes the promise of autonomously performing tasks on behalf of users, in reality, agents often fall short on complex tasks in real-world contexts and modeling user preference. This presents an opportunity for humans to collaborate with the agen…
-
 
 ### Other / arXiv
 
@@ -709,15 +444,7 @@ Furthermore…
   - 🤗 · `2026-11-19`
 
 
-## Harness  (58)
-
-### NeurIPS
-
-- **[STRATUS: A Multi-agent System for Autonomous Reliability Engineering of Modern Clouds](https://arxiv.org/abs/2506.02009)**
-  - *Yin-Fang Chen, Jia-Qi Pan, Jackson Clark et al.*
-  - **NeurIPS 2025** · `2025-05-27`
-  - In cloud-scale systems, failures are the norm. A distributed computing cluster exhibits hundreds of machine failures and thousands of disk failures; software bugs and misconfigurations are reported to be more frequent. The demand for autonomous, AI-driven reliability engineering…
-
+## Harness  (54)
 
 ### ICML
 
@@ -807,11 +534,6 @@ come from. We evaluate Meta-Harness, Agentic H…
 - **[Agentic Evaluation Framework for Option Trading](https://openreview.net/forum?id=OAxCMnrFbJ)**
   - **ICML 2025** · OpenReview · `2026-06-08`
 
-- **[FairCoder: Probing LLM Bias in High-Stakes Decision Making via Coding Tasks](https://openreview.net/forum?id=n7Mk11IVX8)**
-  - *Yongkang Du, Jen-tse Huang, Jieyu Zhao et al.*
-  - **ICML 2025** · OpenReview · `2026-06-03`
-  - Large language models (LLMs) are increasingly used in high-stakes decisions such as hiring and college admissions, making their social bias a critical concern. While LLMs are trained to refuse explicitly biased requests, bias can be leaked implicitly during LLM planning and reaso…
-
 - **[Operational Reframing and Approval-Framed Delegation in Multi-Agent LLM Safety](https://openreview.net/forum?id=7UXZAFMvpZ)**
   - *Lifei Liu, Haoran Yu, Xiaochong Jiang et al.*
   - **ICML 2025** · OpenReview · `2026-05-26`
@@ -863,15 +585,15 @@ unimo…
   - **ICML 2025** · OpenReview · `2025-09-25`
   - Despite the growing attention to time series forecasting in recent years, many studies have proposed various solutions to address the challenges encountered in time series prediction, aiming to improve forecasting performance. However, the strategic interactions inherent in finan…
 
-- **[CTBench: Cryptocurrency Time Series Generation Benchmark](https://openreview.net/forum?id=RzT2sombPD)**
-  - *Yihao Ang, Qiang Wang, Qiang Huang et al.*
-  - **ICML 2025** · OpenReview · `2025-09-17`
-  - Synthetic time series are vital for data augmentation, stress testing, and prototyping in quantitative finance. Yet in cryptocurrency markets, characterized by 24/7 trading, extreme volatility, and rapid regime shifts, existing Time Series Generation (TSG) methods and benchmarks…
-
 - **[AU-Harness: An Open-Source Toolkit for Holistic Evaluation of AudioLLMs](https://openreview.net/forum?id=3eoCXVxvbZ)**
   - *Hoang H Nguyen, Sidharth Surapaneni, Akshay Kalkunte Suresh et al.*
   - **ICML 2025** · OpenReview · `2025-09-17`
   - Large Audio Language Models (LALMs) are rapidly advancing, but evaluating them remains challenging due to inefficient toolkits that limit fair comparison and systematic assessment. Current frameworks suffer from three critical issues: slow processing that bottlenecks large-scale…
+
+- **[CTBench: Cryptocurrency Time Series Generation Benchmark](https://openreview.net/forum?id=RzT2sombPD)**
+  - *Yihao Ang, Qiang Wang, Qiang Huang et al.*
+  - **ICML 2025** · OpenReview · `2025-09-17`
+  - Synthetic time series are vital for data augmentation, stress testing, and prototyping in quantitative finance. Yet in cryptocurrency markets, characterized by 24/7 trading, extreme volatility, and rapid regime shifts, existing Time Series Generation (TSG) methods and benchmarks…
 
 - **[Prompt Genotyping: Quantifying the Evaluation Gap Between Synthetic Benchmarks and Real LLM Performance](https://openreview.net/forum?id=WCNAcIKREG)**
   - *Sohum Mehta, Saaketh Bhojanam*
@@ -969,44 +691,7 @@ Evaluating these routing systems is important yet inherently challenging due…
   - Multimodal Large Language Models (MLLMs) have shown impressive abilities in interacting with visual content with myriad potential downstream tasks. However, even though a list of benchmarks has been proposed, the capabilities and limitations of MLLMs are still not comprehensively…
 
 
-### ICLR
-
-- **[MCP-SafetyBench: A Benchmark for Safety Evaluation of Large Language Models with Real-World MCP Servers](https://arxiv.org/abs/2512.15163)**
-  - *Xuan Zong, Zhiqi Shen, Lei Wang et al.*
-  - **ICLR 2025** · `2025-12-17`
-  - Large language models (LLMs) are evolving into agentic systems that reason, plan, and operate external tools. The Model Context Protocol (MCP) is a key enabler of this transition, offering a standardized interface for connecting LLMs with heterogeneous tools and services. Yet MCP…
-
-
-### ACL
-
-- **[Multi-Agent-as-Judge: Aligning LLM-Agent-Based Automated Evaluation with Multi-Dimensional Human Evaluation](https://arxiv.org/abs/2507.21028)**
-  - *Jia-Ju Chen, Yuxuan Lu, Xiaojie Wang et al.*
-  - **ACL 2025** · `2025-07-28`
-  - Nearly all human work is collaborative; thus, the evaluation of real-world NLP applications often requires multiple dimensions that align with diverse human perspectives. As real human evaluator resources are often scarce and costly, the emerging"LLM-as-a-judge"paradigm sheds lig…
-
-
-## Finance  (112)
-
-### AAAI
-
-- **[Two Heads are Better than One: Distilling Large Language Model Features Into Small Models with Feature Decomposition and Mixture](https://arxiv.org/abs/2511.07110)**
-  - *Tian-Hao Fu, Xin-Xin Xu, Weichen Xu et al.*
-  - **AAAI 2025** · `2025-11-10`
-  - Market making (MM) through Reinforcement Learning (RL) has attracted significant attention in financial trading. With the development of Large Language Models (LLMs), more and more attempts are being made to apply LLMs to financial areas. A simple, direct application of LLM as an…
-
-- **[TimeCAP: Learning to Contextualize, Augment, and Predict Time Series Events with Large Language Model Agents](https://arxiv.org/abs/2502.11418)**
-  - *Ge-On Lee, Wen-Chao Yu, Kijung Shin et al.*
-  - **AAAI 2025** · `2025-02-17`
-  - Time series data is essential in various applications, including climate modeling, healthcare monitoring, and financial analytics. Understanding the contextual information associated with real-world time series data is often essential for accurate and reliable event predictions.…
-
-
-### NeurIPS
-
-- **[Uncertainty Quantification for Language Models: Standardizing and Evaluating Black-Box, White-Box, LLM Judge, and Ensemble Scorers](https://openreview.net/forum?id=HZ7qyXMTlw)**
-  - *Dylan Bouchard, Mohit Singh Chauhan*
-  - **NeurIPS 2025** · OpenReview · `2025-08-25`
-  - Hallucinations are a persistent problem with Large Language Models (LLMs). As these models become increasingly used in high-stakes domains, such as healthcare and finance, the need for effective hallucination detection is crucial. To this end, we outline a versatile framework for…
-
+## Finance  (100)
 
 ### ICML
 
@@ -1062,11 +747,6 @@ Cryptocurrency blockchains enable secure, decentralized financial transactions, 
 
 - **[Agentic Evaluation Framework for Option Trading](https://openreview.net/forum?id=OAxCMnrFbJ)**
   - **ICML 2025** · OpenReview · `2026-06-08`
-
-- **[FairCoder: Probing LLM Bias in High-Stakes Decision Making via Coding Tasks](https://openreview.net/forum?id=n7Mk11IVX8)**
-  - *Yongkang Du, Jen-tse Huang, Jieyu Zhao et al.*
-  - **ICML 2025** · OpenReview · `2026-06-03`
-  - Large language models (LLMs) are increasingly used in high-stakes decisions such as hiring and college admissions, making their social bias a critical concern. While LLMs are trained to refuse explicitly biased requests, bias can be leaked implicitly during LLM planning and reaso…
 
 - **[A multi-agent system for financial retrieval](https://openreview.net/forum?id=X86jxEIVtX)**
   - **ICML 2025** · OpenReview · `2026-02-11`
@@ -1144,6 +824,11 @@ Evaluating these routing systems is important yet inherently challenging due…
   - *Jitian Zhao, Changho Shin, Tzu-Heng Huang et al.*
   - **ICML 2025** · OpenReview · `2025-08-29`
   - LLM-as-a-judge---often with multiple judges---is now the standard for scalable model evaluation, yet judge biases and correlations can amplify errors. We cast aggregation as inference in a latent-factor Markov random field that jointly models a latent true-quality variable, inter…
+
+- **[Uncertainty Quantification for Language Models: Standardizing and Evaluating Black-Box, White-Box, LLM Judge, and Ensemble Scorers](https://openreview.net/forum?id=HZ7qyXMTlw)**
+  - *Dylan Bouchard, Mohit Singh Chauhan*
+  - **ICML 2025** · OpenReview · `2025-08-25`
+  - Hallucinations are a persistent problem with Large Language Models (LLMs). As these models become increasingly used in high-stakes domains, such as healthcare and finance, the need for effective hallucination detection is crucial. To this end, we outline a versatile framework for…
 
 - **[TradingGroup: A Multi-Agent Trading System with Self-Reflection and Data-Synthesis](https://arxiv.org/abs/2508.17565)**
   - *Feng Tian, Flora D. Salim, Hao Xue*
@@ -1503,66 +1188,6 @@ Due to disintermediation, these marketplaces trade off increased privacy for hig
   - **ICML 2025** · OpenReview · `2007-01-01`
   - This paper describes an approach to fraud detection targeted at applications where this task is followed by a posterior human analysis of the signaled frauds. This is a frequent setup on fraud detection applications (e.g. credit card misuse, telecom fraud, etc.). In real world ap…
 
-- **[Application of Large Language Model Fine-Tuning in Financial News Sentiment Recognition](https://doi.org/10.1145/3832928.3833015)**
-  - *Le-Le Zhang*
-  - **ICML 2026** · `2026-05-15`
-  - The application of sentiment information in financial market analysis has drawn growing attention from both academia and industry. Nevertheless, as the volume of financial news and textual data continues to expand, traditional manual analysis methods show obvious limitations in t…
-
-
-### ICLR
-
-- **[MCP-SafetyBench: A Benchmark for Safety Evaluation of Large Language Models with Real-World MCP Servers](https://arxiv.org/abs/2512.15163)**
-  - *Xuan Zong, Zhiqi Shen, Lei Wang et al.*
-  - **ICLR 2025** · `2025-12-17`
-  - Large language models (LLMs) are evolving into agentic systems that reason, plan, and operate external tools. The Model Context Protocol (MCP) is a key enabler of this transition, offering a standardized interface for connecting LLMs with heterogeneous tools and services. Yet MCP…
-
-
-### KDD
-
-- **[CryptoMixer: Fine-grained market information-aware MLP Networks for Individual Cryptocurrency Trading Prediction](https://www.semanticscholar.org/paper/7700a7579ca8f11b5b31323e6e1fac103dabc2e7)**
-  - *Ting-Sheng Feng, Zhi-Hao Shen, Xi Zhao et al.*
-  - **KDD 2025** · `2025-08-03`
-  - Accurately predicting user trading behavior in decentralized exchanges is essential for investors to mitigate risks and optimize their trading strategies. While existing research primarily focuses on predicting trading behavior in stock markets, these methods often struggle to ad…
-
-
-### ACL
-
-- **[From Storage to Experience: A Survey on the Evolution of LLM Agent Memory Mechanisms](https://arxiv.org/abs/2605.06716)**
-  - *Jing Luo, Yu-Chen Tian, Chu-Xue Cao et al.*
-  - **ACL 2026** · `2026-05-07`
-  - Large Language Model (LLM)-based agents have fundamentally reshaped artificial intelligence by integrating external tools and planning capabilities. While memory mechanisms have emerged as the architectural cornerstone of these systems, current research remains fragmented, oscill…
-
-- **[MultiFinBen: Benchmarking Large Language Models for Multilingual and Multimodal Financial Application](https://arxiv.org/abs/2506.14028)**
-  - *Xue-Qing Peng, Ling-Fei Qian, Yan Wang et al.*
-  - **ACL 2025** · `2025-06-16`
-  - Real-world financial analysis involves information across multiple languages and modalities, from reports and news to scanned filings and meeting recordings. Yet most existing evaluations of LLMs in finance remain text-only, monolingual, and largely saturated by current models. T…
-
-- **[FLAG-Trader: Fusion LLM-Agent with Gradient-based Reinforcement Learning for Financial Trading](https://arxiv.org/abs/2502.11433)**
-  - *Guo-Jun Xiong, Zhiyang Deng, Ke-Yi Wang et al.*
-  - **ACL 2025** · `2025-02-17`
-  - Large language models (LLMs) fine-tuned on multimodal financial data have demonstrated impressive reasoning capabilities in various financial tasks. However, they often struggle with multi-step, goal-oriented scenarios in interactive financial markets, such as trading, where comp…
-
-
-### EMNLP
-
-- **[Let Them Steal: Trapping Large Language Model Extraction Attacks with Knowledge Honeypot](https://arxiv.org/abs/2606.15810)**
-  - *Yu-Yang Dai, Yu-Shun Dong*
-  - **EMNLP 2026** · `2026-06-14`
-  - Large language models deployed as commercial APIs are vulnerable to model extraction attacks, while existing defenses either act too late or degrade utility for legitimate users. We propose \textbf{Knowledge Trap}, a defense that redirects extraction attacks toward low-transferab…
-
-- **[PaperScout: An Autonomous Agent for Academic Paper Search with Process-Aware Sequence-Level Policy Optimization](https://arxiv.org/abs/2601.10029)**
-  - *Ting-Yue Pan, Jie Ouyang, Ming-Yue Cheng et al.*
-  - **EMNLP 2026** · `2026-01-15`
-  - Academic paper search is a fundamental task in scientific research, yet most existing approaches organize retrieval around predefined workflows or structured interaction protocols that struggle with complex, conditional queries. To address this limitation, we propose PaperScout,…
-
-
-### IJCAI
-
-- **[Fin-PRM: A Domain-Specialized Process Reward Model for Financial Reasoning in Large Language Models](https://arxiv.org/abs/2508.15202)**
-  - *Jie Zhu, Yuanchen Zhou, Shuo Jiang et al.*
-  - **IJCAI 2025** · `2025-08-21`
-  - Process Reward Models (PRMs) supervise intermediate reasoning steps in large language models (LLMs), but existing PRMs are mainly trained on general-domain data and struggle with the structured, symbolic, and fact-sensitive nature of financial reasoning. Financial tasks require n…
-
 
 ---
-*Generated 2026-11-21 · Sources: HuggingFace Daily Papers, OpenReview, Semantic Scholar, arXiv*
+*Generated 2026-11-22 · Sources: HuggingFace Daily Papers, OpenReview, Semantic Scholar, arXiv*
