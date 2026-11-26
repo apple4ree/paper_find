@@ -17,8 +17,9 @@ from typing import Dict, List, Optional
 
 import requests
 
-from ..config import CONFERENCES, LOOKBACK_DAYS, SS_FIELDS, TOPICS
+from ..config import CONFERENCES, SS_FIELDS, TOPICS
 from ..models import Paper
+from ..collection import CollectionStats, observed_query, response_records
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,7 @@ class SemanticScholarScraper:
         api_key: Optional[str] = None,
         session: Optional[requests.Session] = None,
     ):
+        self.stats = CollectionStats("semantic_scholar")
         self.session = session or requests.Session()
         self.session.headers.update({"User-Agent": "paper-find-bot/1.0"})
         self._has_key = bool(api_key)
@@ -83,11 +85,14 @@ class SemanticScholarScraper:
     # Public interface
     # ------------------------------------------------------------------
 
-    def fetch(self) -> List[Paper]:
+    def fetch(self, target_date: Optional[date] = None) -> List[Paper]:
         """Return recent conference papers matching our topic keywords."""
         seen: Dict[str, Paper] = {}
-        current_year = date.today().year
+        current_year = (target_date or date.today()).year
         year_range = f"{current_year - 1}-{current_year}"
+        # Broad discovery is intentional. Recency is classified centrally with
+        # LOOKBACK_DAYS; unknown dates must not silently disappear here.
+        self.stats.context.update(year_range=year_range, search_mode="discovery")
 
         for topic, terms in TOPIC_SEARCH_TERMS.items():
             for term in terms:
@@ -129,6 +134,7 @@ class SemanticScholarScraper:
     # Internal helpers
     # ------------------------------------------------------------------
 
+    @observed_query
     def _search(self, query: str, year_range: str, limit: int = 100) -> List[Paper]:
         params = {
             "query": query,
@@ -139,6 +145,9 @@ class SemanticScholarScraper:
         resp = self.session.get(SS_SEARCH_URL, params=params, timeout=30)
         resp.raise_for_status()
         data = resp.json()
+        if not isinstance(data, dict) or not isinstance(data.get("data"), list):
+            raise ValueError("Expected Semantic Scholar data list")
+        response_records(self, len(data["data"]), limit)
 
         papers: List[Paper] = []
         for item in data.get("data") or []:

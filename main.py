@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import argparse
 import logging
+import json
+from copy import deepcopy
 import os
 import sys
 from collections import Counter
@@ -72,6 +74,10 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("SS_API_KEY", ""),
         help="Semantic Scholar API key (or set SS_API_KEY env var).",
     )
+    p.add_argument('--strict', action='store_true', help='Exit 2 after saving diagnostics when collection is incomplete or count alerts fire.')
+    p.add_argument('--drop-ratio', type=float, default=0.5)
+    p.add_argument('--spike-ratio', type=float, default=2.0)
+    p.add_argument('--min-baseline', type=int, default=20)
     return p.parse_args()
 
 
@@ -90,42 +96,36 @@ def main() -> int:
     all_papers = []
     source_counts: Counter = Counter()
 
-    # ---- HuggingFace -------------------------------------------------------
-    if not args.skip_hf:
-        logger.info("=== HuggingFace Papers ===")
-        from src.scrapers.huggingface import HuggingFaceScraper
-        hf_papers = HuggingFaceScraper().fetch(target_date)
-        logger.info("  collected %d papers", len(hf_papers))
-        all_papers.extend(hf_papers)
-        for p in hf_papers:
-            source_counts[p.source] += 1
+    from src.collection import CollectionStats
+    from src.scrapers.huggingface import HuggingFaceScraper
+    from src.scrapers.semantic_scholar import SemanticScholarScraper
+    from src.scrapers.arxiv import ArxivScraper
+    from src.scrapers.openreview import OpenReviewScraper
 
-    # ---- Semantic Scholar --------------------------------------------------
-    if not args.skip_s2:
-        logger.info("=== Semantic Scholar (conference papers) ===")
-        from src.scrapers.semantic_scholar import SemanticScholarScraper
-        ss_papers = SemanticScholarScraper(api_key=args.s2_key or None).fetch()
-        logger.info("  collected %d papers", len(ss_papers))
-        all_papers.extend(ss_papers)
-        source_counts["semantic_scholar"] += len(ss_papers)
-
-    # ---- arXiv -------------------------------------------------------------
-    if not args.skip_arxiv:
-        logger.info("=== arXiv (recent submissions) ===")
-        from src.scrapers.arxiv import ArxivScraper
-        arxiv_papers = ArxivScraper().fetch(target_date)
-        logger.info("  collected %d papers", len(arxiv_papers))
-        all_papers.extend(arxiv_papers)
-        source_counts["arxiv"] += len(arxiv_papers)
-
-    # ---- OpenReview --------------------------------------------------------
-    if not args.skip_openreview:
-        logger.info("=== OpenReview (ICLR / NeurIPS / ICML) ===")
-        from src.scrapers.openreview import OpenReviewScraper
-        or_papers = OpenReviewScraper().fetch()
-        logger.info("  collected %d papers", len(or_papers))
-        all_papers.extend(or_papers)
-        source_counts["openreview"] += len(or_papers)
+    if not (0 < args.drop_ratio < 1 < args.spike_ratio) or args.min_baseline < 1:
+        logger.error("Invalid alert thresholds")
+        return 1
+    source_runs = []
+    for name, skipped, factory in [
+        ("huggingface", args.skip_hf, HuggingFaceScraper),
+        ("semantic_scholar", args.skip_s2, lambda: SemanticScholarScraper(api_key=args.s2_key or None)),
+        ("arxiv", args.skip_arxiv, ArxivScraper),
+        ("openreview", args.skip_openreview, OpenReviewScraper),
+    ]:
+        papers = []
+        stats = CollectionStats(name, skipped=skipped)
+        if not skipped:
+            logger.info("=== %s ===", name)
+            try:
+                scraper = factory()
+                stats = scraper.stats
+                papers = scraper.fetch(target_date)
+            except Exception as exc:
+                stats.fatal_error = type(exc).__name__
+                logger.error("%s collection failed: %s", name, type(exc).__name__)
+            all_papers.extend(papers)
+            source_counts[name] = len(papers)
+        source_runs.append(stats.summary(papers))
 
     if not all_papers:
         logger.warning("No papers collected — check network access and try again.")
@@ -133,17 +133,28 @@ def main() -> int:
     # ---- Process -----------------------------------------------------------
     logger.info("=== Processing %d raw papers ===", len(all_papers))
     from src.processor import PaperProcessor
-    categorized = PaperProcessor().process(all_papers)
+    categorized = PaperProcessor().process(deepcopy(all_papers))
 
     # ---- Format & save -----------------------------------------------------
     from src.formatter import PaperFormatter
-    report = PaperFormatter().format(categorized, target_date)
+    from src.audit import build_audit
+    audit = build_audit(categorized, all_papers, source_runs, target_date, output_dir,
+                        args.min_baseline, args.drop_ratio, args.spike_ratio)
+    report = PaperFormatter().format(categorized, target_date, audit)
 
     date_file = output_dir / f"{target_date}.md"
     latest_file = output_dir / "latest.md"
 
-    date_file.write_text(report, encoding="utf-8")
-    latest_file.write_text(report, encoding="utf-8")
+    def save_atomic(path, content):
+        temp = path.with_suffix(path.suffix + '.tmp')
+        temp.write_text(content, encoding='utf-8')
+        temp.replace(path)
+
+    save_atomic(output_dir / f"{target_date}.json", json.dumps(audit, ensure_ascii=False, indent=2) + "\n")
+    save_atomic(date_file, report)
+    latest_date = max((p.stem for p in output_dir.glob('????-??-??.md')), default=str(target_date))
+    if str(target_date) >= latest_date and all_papers:
+        save_atomic(latest_file, report)
 
     total = sum(len(v) for v in categorized.values())
     unique = len({id(p) for plist in categorized.values() for p in plist})
@@ -157,7 +168,7 @@ def main() -> int:
     print(f"\n  {'Source':<25} {'Raw':>5}")
     print(f"  {'-'*35}")
     source_label = {
-        "huggingface":        "HuggingFace (daily)",
+        "huggingface":        "HuggingFace (daily+search)",
         "huggingface_search": "HuggingFace (search)",
         "openreview":         "OpenReview (ICLR/NeurIPS/ICML)",
         "semantic_scholar":   "Semantic Scholar",
@@ -179,7 +190,12 @@ def main() -> int:
     print(f"\n  Output: {date_file}")
     print(f"{'='*60}")
 
-    return 0
+    for alert in audit['alerts']:
+        logger.warning("Collection alert: %s", alert)
+    actionable = any(a['kind'] in ('collection_incomplete', 'count_drop', 'count_spike', 'high_disappearance') for a in audit['alerts'])
+    if not all_papers and not all(s['status'] == 'skipped' for s in source_runs):
+        return 2
+    return 2 if args.strict and actionable else 0
 
 
 if __name__ == "__main__":
